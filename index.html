@@ -618,9 +618,9 @@ const COURSE_QUIZ={ohs:OHS_QUIZ,fire:FIRE_QUIZ};
 // ============================================================
 let currentUser=null,users={};
 
-async function loadUsers(){try{const r=await window.storage.get('sa_users');if(r)users=JSON.parse(r.value);}catch(e){users={};}}
-async function saveUsers(){try{await window.storage.set('sa_users',JSON.stringify(users));}catch(e){}}
-async function loadSession(){try{const r=await window.storage.get('sa_session');if(r){const u=JSON.parse(r.value);if(users[u.email])currentUser=users[u.email];}}catch(e){}}
+async function loadUsers(){try{const r=localStorage.getItem('sa_users');if(r)users=JSON.parse(r);}catch(e){users={};}}
+async function saveUsers(){try{localStorage.setItem('sa_users',JSON.stringify(users));}catch(e){}}
+async function loadSession(){try{const r=localStorage.getItem('sa_session');if(r){const u=JSON.parse(r);if(users[u.email])currentUser=users[u.email];}}catch(e){}}
 
 function openAuth(mode){document.getElementById('authModal').classList.add('open');mode==='reg'?showRegView():showLoginView();}
 function closeAuth(){document.getElementById('authModal').classList.remove('open');}
@@ -678,7 +678,7 @@ async function doLogin(){
   err.style.display='none';
   if(!users[email]||users[email].pass!==btoa(pass)){err.style.display='block';return;}
   currentUser=users[email];
-  await window.storage.set('sa_session',JSON.stringify({email}));
+  localStorage.setItem('sa_session',JSON.stringify({email}));
   closeAuth();updateNavUser();showPage('dashboard');renderDashboard();
 }
 
@@ -696,11 +696,11 @@ async function doRegister(){
   users[email]={name,email,pass:btoa(pass),secQ,secA:btoa(secA),joined:new Date().toISOString(),progress:{},certs:[]};
   await saveUsers();
   currentUser=users[email];
-  await window.storage.set('sa_session',JSON.stringify({email}));
+  localStorage.setItem('sa_session',JSON.stringify({email}));
   closeAuth();updateNavUser();showPage('dashboard');renderDashboard();
 }
 
-async function doLogout(){currentUser=null;try{await window.storage.delete('sa_session');}catch(e){}updateNavUser();goHome();}
+async function doLogout(){currentUser=null;try{localStorage.removeItem('sa_session');}catch(e){}updateNavUser();goHome();}
 
 // ============================================================
 // PASSWORD RECOVERY
