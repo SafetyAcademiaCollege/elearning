@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ka">
 <head>
 <meta charset="UTF-8"/>
@@ -224,6 +224,7 @@ body{font-family:'Noto Sans Georgian',sans-serif;background:var(--dark);color:va
       <div class="form-group"><label class="form-label" id="lblEmail">ელ-ფოსტა</label><input class="form-input" id="loginEmail" type="email" placeholder="email@example.com"/></div>
       <div class="form-group"><label class="form-label" id="lblPass">პაროლი</label><input class="form-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/><div class="form-error" id="loginErr">❌ არასწორი ელ-ფოსტა ან პაროლი</div></div>
       <button class="btn-full" onclick="doLogin()" id="loginBtn">შესვლა →</button>
+      <div style="text-align:center;margin-top:10px"><a onclick="showForgotView()" style="color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline" id="forgotLink">პაროლი დაგავიწყდათ?</a></div>
       <div class="auth-switch">ანგარიში არ გაქვთ? <a onclick="showRegView()">რეგისტრაცია</a></div>
     </div>
     <div id="authRegView" style="display:none">
@@ -231,9 +232,30 @@ body{font-family:'Noto Sans Georgian',sans-serif;background:var(--dark);color:va
       <p id="regSub">შექმენით უფასო ანგარიში</p>
       <div class="form-group"><label class="form-label" id="lblName">სახელი და გვარი</label><input class="form-input" id="regName" type="text" placeholder="სახელი გვარი"/></div>
       <div class="form-group"><label class="form-label" id="lblRegEmail">ელ-ფოსტა</label><input class="form-input" id="regEmail" type="email" placeholder="email@example.com"/></div>
-      <div class="form-group"><label class="form-label" id="lblRegPass">პაროლი</label><input class="form-input" id="regPass" type="password" placeholder="მინ. 6 სიმბოლო"/><div class="form-error" id="regErr">❌ შეცდომა</div></div>
+      <div class="form-group"><label class="form-label" id="lblRegPass">პაროლი</label><input class="form-input" id="regPass" type="password" placeholder="მინ. 6 სიმბოლო"/></div>
+      <div class="form-group"><label class="form-label" id="lblSecQ">უსაფრთხოების კითხვა</label><select class="form-input" id="regSecQ"><option value="">-- აირჩიეთ --</option><option value="mother">დედის გვარი?</option><option value="pet">პირველი ცხოველის სახელი?</option><option value="school">სკოლის სახელი?</option><option value="food">საყვარელი საკვები?</option><option value="city">დაბადების ქალაქი?</option></select></div>
+      <div class="form-group"><label class="form-label" id="lblSecA">პასუხი</label><input class="form-input" id="regSecA" type="text" placeholder="პასუხი"/><div class="form-error" id="regErr">❌ შეცდომა</div></div>
       <button class="btn-full" onclick="doRegister()">რეგისტრაცია →</button>
       <div class="auth-switch">უკვე გაქვთ ანგარიში? <a onclick="showLoginView()">შესვლა</a></div>
+    </div>
+    <div id="authForgotView" style="display:none">
+      <h3>🔑 <span id="forgotTitle">პაროლის აღდგენა</span></h3>
+      <p id="forgotSub">შეიყვანეთ თქვენი ელ-ფოსტა</p>
+      <div id="forgotStep1">
+        <div class="form-group"><label class="form-label" id="lblForgotEmail">ელ-ფოსტა</label><input class="form-input" id="forgotEmail" type="email" placeholder="email@example.com" onkeydown="if(event.key==='Enter')doForgotLookup()"/><div class="form-error" id="forgotErr1">❌ ელ-ფოსტა ვერ მოიძებნა</div></div>
+        <button class="btn-full" id="forgotLookupBtn" onclick="doForgotLookup()">შემდეგი →</button>
+      </div>
+      <div id="forgotStep2" style="display:none">
+        <div class="form-group"><label class="form-label" id="lblForgotQ">უსაფრთხოების კითხვა</label><div class="form-input" id="forgotQDisplay" style="background:var(--dark2);color:var(--muted);cursor:default;min-height:44px;display:flex;align-items:center"></div></div>
+        <div class="form-group"><label class="form-label" id="lblForgotA">პასუხი</label><input class="form-input" id="forgotAnswer" type="text" placeholder="თქვენი პასუხი" onkeydown="if(event.key==='Enter')doForgotVerify()"/><div class="form-error" id="forgotErr2">❌ არასწორი პასუხი</div></div>
+        <button class="btn-full" id="forgotVerifyBtn" onclick="doForgotVerify()">გადამოწმება →</button>
+      </div>
+      <div id="forgotStep3" style="display:none">
+        <div class="form-group"><label class="form-label" id="lblNewPass">ახალი პაროლი</label><input class="form-input" id="forgotNewPass" type="password" placeholder="მინ. 6 სიმბოლო"/></div>
+        <div class="form-group"><label class="form-label" id="lblNewPass2">გაიმეორეთ პაროლი</label><input class="form-input" id="forgotNewPass2" type="password" placeholder="პაროლის გამეორება" onkeydown="if(event.key==='Enter')doResetPassword()"/><div class="form-error" id="forgotErr3">❌ პაროლები არ ემთხვევა</div></div>
+        <button class="btn-full" id="forgotResetBtn" onclick="doResetPassword()">პაროლის შეცვლა ✓</button>
+      </div>
+      <div class="auth-switch" style="margin-top:16px"><a onclick="showLoginView()" id="backToLogin">← შესვლა</a></div>
     </div>
   </div>
 </div>
@@ -409,7 +431,7 @@ const L={
   en:{logoSub:'Safety & OHS College',heroBadge:'E-LEARNING PLATFORM · ონლაინ სწავლება',heroTitle:'Occupational <span style="color:var(--red)">Safety</span><br>At Your Fingertips',heroDesc:'Professional occupational safety training, testing, and certification — all in one platform.',heroCTA:'Register Free →',heroBrowse:'Browse Courses',s1:'Courses',s2:'Lessons',s3:'Certificate',s4:'Languages',catTitle:'Training Catalog',catSub:'6 professional courses — Learn, pass the quiz, get certified',navLogin:'Sign In',navReg:'Register',dashWelcome:'Welcome,',myCoursesTitle:'My Courses',myCertsTitle:'My Certificates',statCompleted:'Completed',statCerts:'Certificates',lessonWord:'Lesson',ofWord:'/',quizTitle:'🧪 Final Quiz',qWord:'Question',nextQ:'Next Question →',finishQ:'See Results ✓',passLabel:'Congratulations! Passed ✓',failLabel:'Not Passed',passSub:(s,t)=>`Correct: <strong>${s}/${t}</strong> — You can now get your certificate`,failSub:(s,t)=>`Correct: <strong>${s}/${t}</strong> — Need 70%+. Please try again.`,btnCert:'🏅 Certificate',btnRetry:'Retake Course',btnRetakeQ:'🔄 Retake Quiz',btnReview:'📚 Review',certBackTxt:'Dashboard',certDlTxt:'Download',certOrgSub:'Safety Academia Vocational College',certHL:'Certificate of Completion',certTxt1:'has successfully completed the training course',certSigTtl:'Administration',certDtLbl:'Date of Issue',soonLabel:'Soon',newLabel:'New',doneLabel:'Completed',startCourse:'Start Course',continueCourse:'Continue',doneCourse:'✓ Completed',aiToggle:'🤖 AI Assistant — Ask',aiPlaceholder:'Ask a question...',downloadLabel:'📄 Course Materials',downloadBtn:'⬇ PDF'}
 };
 function t(k){return L[lang][k]||k;}
-function setLang(l){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim()===(l==='ka'?'ქართ':'ENG')));applyLang();renderCatalog();if(currentUser)renderDashboard();}
+function setLang(l){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim()===(l==='ka'?'ქართ':'ENG')));applyLang();renderCatalog();if(currentUser)renderDashboard();updateSecQOptions();}
 function applyLang(){const ids=['logoSub','heroBadge','heroTitle','heroDesc','heroCTA','heroBrowse','s1','s2','s3','s4','catTitle','catSub','dashWelcome','myCoursesTitle','myCertsTitle','playerBackBtn','quizTitle','certBackTxt','certDlTxt','certOrgSub','certHL','certTxt1','certSigTtl','certDtLbl'];ids.forEach(id=>{const el=document.getElementById(id);if(el&&L[lang][id]!==undefined)el.innerHTML=L[lang][id];});document.getElementById('navLoginBtn').textContent=t('navLogin');document.getElementById('navRegBtn').textContent=t('navReg');}
 
 // ============================================================
@@ -567,8 +589,51 @@ async function loadSession(){try{const r=await window.storage.get('sa_session');
 
 function openAuth(mode){document.getElementById('authModal').classList.add('open');mode==='reg'?showRegView():showLoginView();}
 function closeAuth(){document.getElementById('authModal').classList.remove('open');}
-function showLoginView(){document.getElementById('authLoginView').style.display='';document.getElementById('authRegView').style.display='none';}
-function showRegView(){document.getElementById('authRegView').style.display='';document.getElementById('authLoginView').style.display='none';}
+function showLoginView(){
+  document.getElementById('authLoginView').style.display='';
+  document.getElementById('authRegView').style.display='none';
+  document.getElementById('authForgotView').style.display='none';
+  // update forgot link text for current language
+  const fl=document.getElementById('forgotLink');
+  if(fl)fl.textContent=lang==='ka'?'პაროლი დაგავიწყდათ?':'Forgot your password?';
+}
+function showRegView(){
+  document.getElementById('authRegView').style.display='';
+  document.getElementById('authLoginView').style.display='none';
+  document.getElementById('authForgotView').style.display='none';
+  // update security question options for current language
+  updateSecQOptions();
+}
+function showForgotView(){
+  const isEn=lang==='en';
+  document.getElementById('authLoginView').style.display='none';
+  document.getElementById('authRegView').style.display='none';
+  document.getElementById('authForgotView').style.display='';
+  document.getElementById('forgotStep1').style.display='';
+  document.getElementById('forgotStep2').style.display='none';
+  document.getElementById('forgotStep3').style.display='none';
+  document.getElementById('forgotEmail').value='';
+  document.getElementById('forgotErr1').style.display='none';
+  document.getElementById('forgotTitle').textContent=isEn?'Password Recovery':'პაროლის აღდგენა';
+  document.getElementById('forgotSub').textContent=isEn?'Enter your registered email address':'შეიყვანეთ თქვენი ელ-ფოსტა';
+  document.getElementById('lblForgotEmail').textContent=isEn?'Email':'ელ-ფოსტა';
+  document.getElementById('forgotLookupBtn').textContent=isEn?'Next →':'შემდეგი →';
+  document.getElementById('backToLogin').textContent=isEn?'← Back to Sign In':'← შესვლა';
+}
+function updateSecQOptions(){
+  const sel=document.getElementById('regSecQ');
+  if(!sel)return;
+  const opts=lang==='en'?
+    [['','-- Select --'],['mother',"Mother\'s maiden name?"],['pet',"First pet\'s name?"],['school','Name of primary school?'],['food','Favourite food?'],['city','City of birth?']]:
+    [['','-- აირჩიეთ --'],['mother','დედის გვარი?'],['pet','პირველი ცხოველის სახელი?'],['school','სკოლის სახელი?'],['food','საყვარელი საკვები?'],['city','დაბადების ქალაქი?']];
+  const cur=sel.value;
+  sel.innerHTML=opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join('');
+  sel.value=cur;
+  document.getElementById('lblSecQ').textContent=lang==='en'?'Security Question':'უსაფრთხოების კითხვა';
+  document.getElementById('lblSecA').textContent=lang==='en'?'Answer':'პასუხი';
+  const fl=document.getElementById('forgotLink');
+  if(fl)fl.textContent=lang==='ka'?'პაროლი დაგავიწყდათ?':'Forgot your password?';
+}
 
 async function doLogin(){
   const email=document.getElementById('loginEmail').value.trim().toLowerCase();
@@ -585,11 +650,14 @@ async function doRegister(){
   const name=document.getElementById('regName').value.trim();
   const email=document.getElementById('regEmail').value.trim().toLowerCase();
   const pass=document.getElementById('regPass').value;
+  const secQ=document.getElementById('regSecQ').value;
+  const secA=document.getElementById('regSecA').value.trim().toLowerCase();
   const err=document.getElementById('regErr');
   err.style.display='none';
-  if(!name||!email||pass.length<6){err.textContent='❌ შეავსეთ ყველა ველი (პაროლი მინ. 6)';err.style.display='block';return;}
-  if(users[email]){err.textContent='❌ ეს ელ-ფოსტა უკვე რეგისტრირებულია';err.style.display='block';return;}
-  users[email]={name,email,pass:btoa(pass),joined:new Date().toISOString(),progress:{},certs:[]};
+  if(!name||!email||pass.length<6){err.textContent=lang==='ka'?'❌ შეავსეთ ყველა ველი (პაროლი მინ. 6)':'❌ Fill all fields (password min. 6 chars)';err.style.display='block';return;}
+  if(!secQ||!secA){err.textContent=lang==='ka'?'❌ უსაფრთხოების კითხვა სავალდებულოა':'❌ Security question is required';err.style.display='block';return;}
+  if(users[email]){err.textContent=lang==='ka'?'❌ ეს ელ-ფოსტა უკვე რეგისტრირებულია':'❌ This email is already registered';err.style.display='block';return;}
+  users[email]={name,email,pass:btoa(pass),secQ,secA:btoa(secA),joined:new Date().toISOString(),progress:{},certs:[]};
   await saveUsers();
   currentUser=users[email];
   await window.storage.set('sa_session',JSON.stringify({email}));
@@ -597,6 +665,82 @@ async function doRegister(){
 }
 
 async function doLogout(){currentUser=null;try{await window.storage.delete('sa_session');}catch(e){}updateNavUser();goHome();}
+
+// ============================================================
+// PASSWORD RECOVERY
+// ============================================================
+const SEC_Q_LABELS={
+  mother:{ka:'დედის გვარი?',en:"Mother's maiden name?"},
+  pet:{ka:'პირველი ცხოველის სახელი?',en:"First pet's name?"},
+  school:{ka:'სკოლის სახელი?',en:'Name of primary school?'},
+  food:{ka:'საყვარელი საკვები?',en:'Favourite food?'},
+  city:{ka:'დაბადების ქალაქი?',en:'City of birth?'}
+};
+
+function doForgotLookup(){
+  const email=document.getElementById('forgotEmail').value.trim().toLowerCase();
+  const err=document.getElementById('forgotErr1');
+  err.style.display='none';
+  if(!users[email]||!users[email].secQ){
+    err.textContent=lang==='ka'?'❌ ელ-ფოსტა ვერ მოიძებნა':'❌ Email not found';
+    err.style.display='block';return;
+  }
+  const qLabel=SEC_Q_LABELS[users[email].secQ]?.[lang]||users[email].secQ;
+  document.getElementById('forgotQDisplay').textContent=qLabel;
+  document.getElementById('lblForgotQ').textContent=lang==='ka'?'უსაფრთხოების კითხვა':'Security Question';
+  document.getElementById('lblForgotA').textContent=lang==='ka'?'პასუხი':'Answer';
+  document.getElementById('forgotVerifyBtn').textContent=lang==='ka'?'გადამოწმება →':'Verify →';
+  document.getElementById('forgotAnswer').placeholder=lang==='ka'?'თქვენი პასუხი':'Your answer';
+  document.getElementById('forgotStep1').style.display='none';
+  document.getElementById('forgotStep2').style.display='';
+  document.getElementById('forgotAnswer').value='';
+  document.getElementById('forgotErr2').style.display='none';
+  window._resetEmail=email;
+}
+
+function doForgotVerify(){
+  const answer=document.getElementById('forgotAnswer').value.trim().toLowerCase();
+  const err=document.getElementById('forgotErr2');
+  err.style.display='none';
+  if(!window._resetEmail||!users[window._resetEmail]){err.style.display='block';return;}
+  if(!answer||users[window._resetEmail].secA!==btoa(answer)){
+    err.textContent=lang==='ka'?'❌ არასწორი პასუხი':'❌ Incorrect answer';
+    err.style.display='block';return;
+  }
+  document.getElementById('lblNewPass').textContent=lang==='ka'?'ახალი პაროლი':'New Password';
+  document.getElementById('lblNewPass2').textContent=lang==='ka'?'გაიმეორეთ პაროლი':'Confirm Password';
+  document.getElementById('forgotNewPass').placeholder=lang==='ka'?'მინ. 6 სიმბოლო':'Min. 6 characters';
+  document.getElementById('forgotNewPass2').placeholder=lang==='ka'?'პაროლის გამეორება':'Repeat password';
+  document.getElementById('forgotResetBtn').textContent=lang==='ka'?'პაროლის შეცვლა ✓':'Change Password ✓';
+  document.getElementById('forgotStep2').style.display='none';
+  document.getElementById('forgotStep3').style.display='';
+  document.getElementById('forgotNewPass').value='';
+  document.getElementById('forgotNewPass2').value='';
+  document.getElementById('forgotErr3').style.display='none';
+}
+
+async function doResetPassword(){
+  const p1=document.getElementById('forgotNewPass').value;
+  const p2=document.getElementById('forgotNewPass2').value;
+  const err=document.getElementById('forgotErr3');
+  err.style.display='none';
+  if(p1.length<6){
+    err.textContent=lang==='ka'?'❌ პაროლი მინ. 6 სიმბოლო':'❌ Password must be at least 6 characters';
+    err.style.display='block';return;
+  }
+  if(p1!==p2){
+    err.textContent=lang==='ka'?'❌ პაროლები არ ემთხვევა':'❌ Passwords do not match';
+    err.style.display='block';return;
+  }
+  users[window._resetEmail].pass=btoa(p1);
+  await saveUsers();
+  delete window._resetEmail;
+  document.getElementById('forgotStep3').innerHTML=`<div style="text-align:center;padding:24px 0">
+    <div style="font-size:48px;margin-bottom:16px">✅</div>
+    <p style="color:var(--green);font-size:16px;font-weight:700;margin-bottom:8px">${lang==='ka'?'პაროლი წარმატებით შეიცვალა!':'Password changed successfully!'}</p>
+    <p style="color:var(--muted);font-size:13px">${lang==='ka'?'ახლა შეგიძლიათ ახალი პაროლით შეხვიდეთ.':'You can now sign in with your new password.'}</p>
+  </div>`;
+}
 
 function updateNavUser(){
   document.getElementById('navGuest').style.display=currentUser?'none':'';
