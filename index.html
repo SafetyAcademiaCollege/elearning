@@ -68,6 +68,9 @@ body{font-family:'Noto Sans Georgian',sans-serif;background:var(--dark);color:va
 .badge-new{background:rgba(192,39,45,.2);color:var(--red-light);border:1px solid rgba(192,39,45,.3);}
 .badge-soon{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border);}
 .badge-done{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3);}
+.badge-due{background:rgba(230,126,34,.2);color:#e67e22;border:1px solid rgba(230,126,34,.4);}
+.course-card.due{border-top-color:#e67e22;}
+.course-card.due .progress-mini-fill{background:#e67e22;}
 .progress-mini{height:4px;background:var(--dark3);border-radius:2px;margin-top:8px;}
 .progress-mini-fill{height:100%;background:var(--red);border-radius:2px;transition:width .5s;}
 .course-card.completed .progress-mini-fill{background:var(--green);}
@@ -462,8 +465,8 @@ body{font-family:'Noto Sans Georgian',sans-serif;background:var(--dark);color:va
 // ============================================================
 let lang='ka';
 const L={
-  ka:{logoSub:'უსაფრთხოების კოლეჯი',heroBadge:'ელექტრონული სწავლების პლატფორმა · E-LEARNING PLATFORM',heroTitle:'შრომის <span style="color:var(--red)">უსაფრთხოება</span><br>თქვენს ხელთაა',heroDesc:'პროფესიული ტრენინგები შრომის უსაფრთხოებაში, ტესტირება და სერთიფიკატი — ყველაფერი ერთ პლატფორმაზე.',heroCTA:'უფასო რეგისტრაცია →',heroBrowse:'კურსების ნახვა',s1:'ტრენინგი',s2:'გაკვეთილი',s3:'სერთიფიკატი',s4:'ენა',catTitle:'ტრენინგის კატალოგი',catSub:'6 პროფესიული კურსი — გაიარეთ, ჩააბარეთ ტესტი, მიიღეთ სერთიფიკატი',navLogin:'შესვლა',navReg:'რეგისტრაცია',dashWelcome:'გამარჯობა,',myCoursesTitle:'ჩემი კურსები',myCertsTitle:'ჩემი სერთიფიკატები',statCompleted:'გავლილი',statCerts:'სერთიფიკატი',lessonWord:'გაკვეთილი',ofWord:'/',quizTitle:'🧪 საბოლოო ტესტი',qWord:'კითხვა',nextQ:'შემდეგი კითხვა →',finishQ:'შედეგი ✓',passLabel:'გილოცავთ! გაიარეთ ✓',failLabel:'ვწუხვართ, ვერ გაიარეთ',passSub:(s,t)=>`სწორი: <strong>${s}/${t}</strong> — სერთიფიკატი შეგიძლიათ მიიღოთ`,failSub:(s,t)=>`სწორი: <strong>${s}/${t}</strong> — საჭიროა 70%+. სცადეთ ხელახლა.`,btnCert:'🏅 სერთიფიკატი',btnRetry:'კურსი ხელახლა',btnRetakeQ:'🔄 ტესტი ხელახლა',btnReview:'📚 გამეორება',certBackTxt:'კაბინეტი',certDlTxt:'გადმოწერა',certOrgSub:'უსაფრთხოების აკადემიის კოლეჯი',certHL:'სერთიფიკატი',certTxt1:'წარმატებით გაიარა ტრენინგი',certSigTtl:'ადმინისტრაცია',certDtLbl:'გაცემის თარიღი',soonLabel:'მალე',newLabel:'ახალი',doneLabel:'გავლილი',startCourse:'კურსის დაწყება',continueCourse:'გაგრძელება',doneCourse:'✓ გავლილი',aiToggle:'🤖 AI ასისტენტი — კითხვა',aiPlaceholder:'კითხვა დასვით...',downloadLabel:'📄 სასწავლო მასალა',downloadBtn:'⬇ PDF'},
-  en:{logoSub:'Safety & OHS College',heroBadge:'E-LEARNING PLATFORM · ონლაინ სწავლება',heroTitle:'Occupational <span style="color:var(--red)">Safety</span><br>At Your Fingertips',heroDesc:'Professional occupational safety training, testing, and certification — all in one platform.',heroCTA:'Register Free →',heroBrowse:'Browse Courses',s1:'Courses',s2:'Lessons',s3:'Certificate',s4:'Languages',catTitle:'Training Catalog',catSub:'6 professional courses — Learn, pass the quiz, get certified',navLogin:'Sign In',navReg:'Register',dashWelcome:'Welcome,',myCoursesTitle:'My Courses',myCertsTitle:'My Certificates',statCompleted:'Completed',statCerts:'Certificates',lessonWord:'Lesson',ofWord:'/',quizTitle:'🧪 Final Quiz',qWord:'Question',nextQ:'Next Question →',finishQ:'See Results ✓',passLabel:'Congratulations! Passed ✓',failLabel:'Not Passed',passSub:(s,t)=>`Correct: <strong>${s}/${t}</strong> — You can now get your certificate`,failSub:(s,t)=>`Correct: <strong>${s}/${t}</strong> — Need 70%+. Please try again.`,btnCert:'🏅 Certificate',btnRetry:'Retake Course',btnRetakeQ:'🔄 Retake Quiz',btnReview:'📚 Review',certBackTxt:'Dashboard',certDlTxt:'Download',certOrgSub:'Safety Academia Vocational College',certHL:'Certificate of Completion',certTxt1:'has successfully completed the training course',certSigTtl:'Administration',certDtLbl:'Date of Issue',soonLabel:'Soon',newLabel:'New',doneLabel:'Completed',startCourse:'Start Course',continueCourse:'Continue',doneCourse:'✓ Completed',aiToggle:'🤖 AI Assistant — Ask',aiPlaceholder:'Ask a question...',downloadLabel:'📄 Course Materials',downloadBtn:'⬇ PDF'}
+  ka:{logoSub:'უსაფრთხოების კოლეჯი',heroBadge:'ელექტრონული სწავლების პლატფორმა · E-LEARNING PLATFORM',heroTitle:'შრომის <span style="color:var(--red)">უსაფრთხოება</span><br>თქვენს ხელთაა',heroDesc:'პროფესიული ტრენინგები შრომის უსაფრთხოებაში, ტესტირება და სერთიფიკატი — ყველაფერი ერთ პლატფორმაზე.',heroCTA:'უფასო რეგისტრაცია →',heroBrowse:'კურსების ნახვა',s1:'ტრენინგი',s2:'გაკვეთილი',s3:'სერთიფიკატი',s4:'ენა',catTitle:'ტრენინგის კატალოგი',catSub:'6 პროფესიული კურსი — გაიარეთ, ჩააბარეთ ტესტი, მიიღეთ სერთიფიკატი',navLogin:'შესვლა',navReg:'რეგისტრაცია',dashWelcome:'გამარჯობა,',myCoursesTitle:'ჩემი კურსები',myCertsTitle:'ჩემი სერთიფიკატები',statCompleted:'გავლილი',statCerts:'სერთიფიკატი',lessonWord:'გაკვეთილი',ofWord:'/',quizTitle:'🧪 საბოლოო ტესტი',qWord:'კითხვა',nextQ:'შემდეგი კითხვა →',finishQ:'შედეგი ✓',passLabel:'გილოცავთ! გაიარეთ ✓',failLabel:'ვწუხვართ, ვერ გაიარეთ',passSub:(s,t)=>`სწორი: <strong>${s}/${t}</strong> — სერთიფიკატი შეგიძლიათ მიიღოთ`,failSub:(s,t)=>`სწორი: <strong>${s}/${t}</strong> — საჭიროა 70%+. სცადეთ ხელახლა.`,btnCert:'🏅 სერთიფიკატი',btnRetry:'კურსი ხელახლა',btnRetakeQ:'🔄 ტესტი ხელახლა',btnReview:'📚 გამეორება',certBackTxt:'კაბინეტი',certDlTxt:'გადმოწერა',certOrgSub:'უსაფრთხოების აკადემიის კოლეჯი',certHL:'სერთიფიკატი',certTxt1:'წარმატებით გაიარა ტრენინგი',certSigTtl:'ადმინისტრაცია',certDtLbl:'გაცემის თარიღი',soonLabel:'მალე',newLabel:'ახალი',doneLabel:'გავლილი',dueLabel:'განახლება საჭირო',renewCourse:'🔄 განახლება',startCourse:'კურსის დაწყება',continueCourse:'გაგრძელება',doneCourse:'✓ გავლილი',aiToggle:'🤖 AI ასისტენტი — კითხვა',aiPlaceholder:'კითხვა დასვით...',downloadLabel:'📄 სასწავლო მასალა',downloadBtn:'⬇ PDF'},
+  en:{logoSub:'Safety & OHS College',heroBadge:'E-LEARNING PLATFORM · ონლაინ სწავლება',heroTitle:'Occupational <span style="color:var(--red)">Safety</span><br>At Your Fingertips',heroDesc:'Professional occupational safety training, testing, and certification — all in one platform.',heroCTA:'Register Free →',heroBrowse:'Browse Courses',s1:'Courses',s2:'Lessons',s3:'Certificate',s4:'Languages',catTitle:'Training Catalog',catSub:'6 professional courses — Learn, pass the quiz, get certified',navLogin:'Sign In',navReg:'Register',dashWelcome:'Welcome,',myCoursesTitle:'My Courses',myCertsTitle:'My Certificates',statCompleted:'Completed',statCerts:'Certificates',lessonWord:'Lesson',ofWord:'/',quizTitle:'🧪 Final Quiz',qWord:'Question',nextQ:'Next Question →',finishQ:'See Results ✓',passLabel:'Congratulations! Passed ✓',failLabel:'Not Passed',passSub:(s,t)=>`Correct: <strong>${s}/${t}</strong> — You can now get your certificate`,failSub:(s,t)=>`Correct: <strong>${s}/${t}</strong> — Need 70%+. Please try again.`,btnCert:'🏅 Certificate',btnRetry:'Retake Course',btnRetakeQ:'🔄 Retake Quiz',btnReview:'📚 Review',certBackTxt:'Dashboard',certDlTxt:'Download',certOrgSub:'Safety Academia Vocational College',certHL:'Certificate of Completion',certTxt1:'has successfully completed the training course',certSigTtl:'Administration',certDtLbl:'Date of Issue',soonLabel:'Soon',newLabel:'New',doneLabel:'Completed',dueLabel:'Renewal Due',renewCourse:'🔄 Renew',startCourse:'Start Course',continueCourse:'Continue',doneCourse:'✓ Completed',aiToggle:'🤖 AI Assistant — Ask',aiPlaceholder:'Ask a question...',downloadLabel:'📄 Course Materials',downloadBtn:'⬇ PDF'}
 };
 function t(k){return L[lang][k]||k;}
 function setLang(l){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim()===(l==='ka'?'ქართ':'ENG')));applyLang();renderCatalog();if(currentUser)renderDashboard();updateSecQOptions();}
@@ -804,6 +807,24 @@ function updateNavUser(){
 }
 
 // ============================================================
+// CERTIFICATE VALIDITY HELPER
+// ============================================================
+function getCertStatus(courseId){
+  const cert=(currentUser?.certs||[]).find(c=>c.courseId===courseId);
+  if(!cert)return{status:'none'};
+  let issued;
+  if(cert.dateISO){issued=new Date(cert.dateISO);}
+  else if(cert.date){const[d,m,y]=cert.date.split('/');issued=new Date(parseInt(y),parseInt(m)-1,parseInt(d));}
+  else return{status:'valid',cert};
+  const expiry=new Date(issued);
+  expiry.setFullYear(expiry.getFullYear()+1);
+  const now=new Date();
+  const daysLeft=Math.ceil((expiry-now)/(1000*60*60*24));
+  const fmt=d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  return{status:now>expiry?'expired':'valid',cert,daysLeft,expiry,expiryFmt:fmt(expiry)};
+}
+
+// ============================================================
 // CATALOG
 // ============================================================
 function renderCatalog(){
@@ -814,15 +835,23 @@ function renderCatalog(){
     const prog=currentUser?.progress?.[c.id]||{};
     const pct=prog.done?100:Math.round(((prog.lessonCount||0)/c.lessons)*100);
     const isDone=prog.done;
-    let badge=!c.available?`<span class="cc-badge badge-soon">${t('soonLabel')}</span>`:isDone?`<span class="cc-badge badge-done">${t('doneLabel')}</span>`:`<span class="cc-badge badge-new">${t('newLabel')}</span>`;
-    let btnTxt=isDone?t('doneCourse'):pct>0?t('continueCourse'):t('startCourse');
-    return `<div class="course-card${!c.available?' locked':''}${isDone?' completed':''}" onclick="${c.available?`startCourse('${c.id}')`:''}" >
+    const cs=currentUser?getCertStatus(c.id):{status:'none'};
+    const isExpired=cs.status==='expired';
+    let badge=!c.available?`<span class="cc-badge badge-soon">${t('soonLabel')}</span>`:
+      isExpired?`<span class="cc-badge badge-due">${t('dueLabel')}</span>`:
+      isDone?`<span class="cc-badge badge-done">${t('doneLabel')}</span>`:
+      `<span class="cc-badge badge-new">${t('newLabel')}</span>`;
+    let btnTxt=isExpired?t('renewCourse'):isDone?t('doneCourse'):pct>0?t('continueCourse'):t('startCourse');
+    const cardClass=`course-card${!c.available?' locked':isExpired?' due':isDone?' completed':''}`;
+    return `<div class="${cardClass}" onclick="${c.available?`startCourse('${c.id}')`:''}" >
       ${badge}
       <div class="cc-tag">${c.icon} ${cd.tag}</div>
       <div class="cc-title">${cd.title}</div>
       <div class="cc-desc">${cd.desc}</div>
       <div class="cc-meta"><span>📚 ${c.lessons} ${lang==='ka'?'გაკვ.':'lessons'}</span><span>⏱ ~${c.mins} ${lang==='ka'?'წთ':'min'}</span></div>
-      ${c.available?`<div class="progress-mini"><div class="progress-mini-fill" style="width:${pct}%"></div></div><button class="btn-sm btn-red" style="margin-top:12px;width:100%" onclick="event.stopPropagation();startCourse('${c.id}')">${btnTxt}</button>`:
+      ${c.available?`<div class="progress-mini"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
+      ${isExpired?`<div style="font-size:11px;color:#e67e22;margin-top:6px">⚠️ ${lang==='ka'?'ვადა:':'Expired:'} ${cs.expiryFmt}</div>`:''}
+      <button class="btn-sm btn-red" style="margin-top:8px;width:100%" onclick="event.stopPropagation();startCourse('${c.id}')">${btnTxt}</button>`:
       `<div style="margin-top:12px;font-size:12px;color:var(--muted)">🔒 ${lang==='ka'?'მალე':'Coming Soon'}</div><div class="locked-overlay"><div class="lock-icon">🔒</div><span>${lang==='ka'?'მალე':'COMING SOON'}</span></div>`}
     </div>`;
   }).join('');
@@ -845,17 +874,29 @@ function renderDashboard(){
   const dg=document.getElementById('dashCoursesGrid');
   dg.innerHTML=COURSES.filter(c=>c.available).map(c=>{
     const cd=c[lang];const p=currentUser.progress[c.id]||{};const pct=p.done?100:Math.round(((p.lessonCount||0)/c.lessons)*100);const isDone=p.done;
-    return `<div class="course-card${isDone?' completed':''}" onclick="startCourse('${c.id}')">
-      <span class="cc-badge ${isDone?'badge-done':'badge-new'}">${isDone?t('doneLabel'):t('newLabel')}</span>
+    const cs=getCertStatus(c.id);const isExpired=cs.status==='expired';
+    const cardClass=`course-card${isExpired?' due':isDone?' completed':''}`;
+    const badgeClass=isExpired?'badge-due':isDone?'badge-done':'badge-new';
+    const badgeTxt=isExpired?t('dueLabel'):isDone?t('doneLabel'):t('newLabel');
+    const btnTxt=isExpired?t('renewCourse'):isDone?t('doneCourse'):pct>0?t('continueCourse'):t('startCourse');
+    return `<div class="${cardClass}" onclick="startCourse('${c.id}')">
+      <span class="cc-badge ${badgeClass}">${badgeTxt}</span>
       <div class="cc-tag">${c.icon} ${cd.tag}</div><div class="cc-title">${cd.title}</div>
       <div class="progress-mini" style="margin:12px 0 4px"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${pct}% ${lang==='ka'?'დასრულებული':'complete'}</div>
-      <button class="btn-sm btn-red" style="width:100%" onclick="event.stopPropagation();startCourse('${c.id}')">${isDone?t('doneCourse'):pct>0?t('continueCourse'):t('startCourse')}</button>
+      ${isExpired?`<div style="font-size:11px;color:#e67e22;margin-bottom:6px">⚠️ ${lang==='ka'?'ვადა:':'Expired:'} ${cs.expiryFmt}</div>`:`<div style="font-size:11px;color:var(--muted);margin-bottom:10px">${pct}% ${lang==='ka'?'დასრულებული':'complete'}</div>`}
+      <button class="btn-sm btn-red" style="width:100%" onclick="event.stopPropagation();startCourse('${c.id}')">${btnTxt}</button>
     </div>`;
   }).join('');
   const cl=document.getElementById('certsList');
   if(!certs.length){cl.innerHTML=`<div style="color:var(--muted);font-size:14px;padding:20px 0">${lang==='ka'?'სერთიფიკატი ჯერ არ გაქვთ':'No certificates yet'}</div>`;return;}
-  cl.innerHTML=certs.map((c,i)=>`<div class="cert-item"><div class="cert-item-info"><strong>${c.courseName}</strong><span>📅 ${c.date}</span></div><button class="btn-view-cert" onclick="viewCert(${i})">🏅 ${lang==='ka'?'ნახვა':'View'}</button></div>`).join('');
+  cl.innerHTML=certs.map((c,i)=>{
+    const cs=getCertStatus(c.courseId);
+    const isExpired=cs.status==='expired';
+    const validityTxt=cs.expiryFmt?(isExpired
+      ?`<span style="color:#e67e22;font-size:11px">⚠️ ${lang==='ka'?'ვადა გასული':'Expired'}: ${cs.expiryFmt}</span>`
+      :`<span style="color:var(--green);font-size:11px">✓ ${lang==='ka'?'ძალაშია':'Valid until'}: ${cs.expiryFmt}</span>`):'';
+    return `<div class="cert-item"><div class="cert-item-info"><strong>${c.courseName}</strong><span>📅 ${c.date}</span>${validityTxt}</div><button class="btn-view-cert" onclick="viewCert(${i})">🏅 ${lang==='ka'?'ნახვა':'View'}</button></div>`;
+  }).join('');
 }
 
 // ============================================================
@@ -867,8 +908,12 @@ function startCourse(id){
   if(!currentUser){openAuth('reg');return;}
   const c=COURSES.find(x=>x.id===id);
   if(!c||!c.available)return;
-  // Record start date if first time opening this course
-  if(!currentUser.progress[id]?.startedAt){
+  // If cert expired, reset progress so user retakes the full course
+  const cs=getCertStatus(id);
+  if(cs.status==='expired'){
+    currentUser.progress[id]={startedAt:new Date().toISOString()};
+    saveUsers();
+  } else if(!currentUser.progress[id]?.startedAt){
     if(!currentUser.progress[id])currentUser.progress[id]={};
     currentUser.progress[id].startedAt=new Date().toISOString();
     saveUsers();
@@ -939,11 +984,14 @@ async function sendAI(){
   try{
     const GEMINI_KEY='AIzaSyCFbPBPmnkB2jGq2bVCm1-5KnsFYr_uf1M';
     const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:`You are Safety Academia's AI assistant. Current lesson: "${l?.title}". Always respond in the same language the user writes in. Be concise and practical about occupational safety.\n\nUser: ${msg}`}]}],generationConfig:{maxOutputTokens:800}})});
+      body:JSON.stringify({contents:[{parts:[{text:`You are Safety Academia's AI assistant. Current lesson: "${l?.title||'General'}". Always respond in the same language the user writes in. Be concise and practical about occupational safety.\n\nUser: ${msg}`}]}],generationConfig:{maxOutputTokens:800,temperature:0.7}})});
+    if(!r.ok){const err=await r.text();throw new Error('HTTP '+r.status+': '+err);}
     const d=await r.json();
-    const reply=d.candidates?.[0]?.content?.parts?.[0]?.text||'...';
-    document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble">${reply.replace(/\n/g,'<br>')}</div></div>`;
-  }catch(e){document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble" style="color:#e74c3c">${lang==='ka'?'შეცდომა':'Error'}</div></div>`;}
+    if(d.error)throw new Error(d.error.message||'Gemini error');
+    const parts=d?.candidates?.[0]?.content?.parts;
+    const reply=(parts&&parts.length>0&&parts[0].text)?parts[0].text:(lang==='ka'?'პასუხი ვერ მივიღე. სცადეთ ხელახლა.':'Could not get a response. Please try again.');
+    document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble">${reply.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;
+  }catch(e){const errMsg=lang==='ka'?'შეცდომა: '+e.message:'Error: '+e.message;document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble" style="color:#e74c3c;font-size:12px">${errMsg}</div></div>`;}
   msgs.scrollTop=msgs.scrollHeight;
 }
 
@@ -993,16 +1041,21 @@ async function showResult(){
 
 async function saveCert(){
   if(!currentUser||!activeCourse)return;
-  if(currentUser.certs.find(c=>c.courseId===activeCourse.id))return;
+  // Allow re-cert only if no cert OR existing cert is expired; otherwise skip
+  const existing=currentUser.certs.find(c=>c.courseId===activeCourse.id);
+  if(existing){const cs=getCertStatus(activeCourse.id);if(cs.status!=='expired')return;}
   const now=new Date();
   const fmt=d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
   const prog=currentUser.progress[activeCourse.id]||{};
   const startedAt=prog.startedAt?new Date(prog.startedAt):now;
   const elapsedH=Math.max(1,Math.round((now-startedAt)/3600000*10)/10);
+  // Replace old cert if renewing
+  currentUser.certs=currentUser.certs.filter(c=>c.courseId!==activeCourse.id);
   currentUser.certs.push({
     courseId:activeCourse.id,
     courseName:activeCourse[lang].title,
     date:fmt(now),
+    dateISO:now.toISOString(),
     cn:fmt(startedAt),
     th:elapsedH
   });
