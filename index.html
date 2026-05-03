@@ -937,10 +937,12 @@ async function sendAI(){
   msgs.scrollTop=msgs.scrollHeight;
   const l=COURSE_LESSONS[activeCourse.id]?.[lang]?.[activeLesson];
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,system:`You are Safety Academia's AI assistant. Current lesson: "${l?.title}". Always respond in the same language the user writes in. Be concise and practical about occupational safety.`,messages:[{role:'user',content:msg}]})});
+    const GEMINI_KEY='AIzaSyCFbPBPmnkB2jGq2bVCm1-5KnsFYr_uf1M';
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:`You are Safety Academia's AI assistant. Current lesson: "${l?.title}". Always respond in the same language the user writes in. Be concise and practical about occupational safety.\n\nUser: ${msg}`}]}],generationConfig:{maxOutputTokens:800}})});
     const d=await r.json();
-    document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble">${(d.content?.[0]?.text||'...').replace(/\n/g,'<br>')}</div></div>`;
+    const reply=d.candidates?.[0]?.content?.parts?.[0]?.text||'...';
+    document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble">${reply.replace(/\n/g,'<br>')}</div></div>`;
   }catch(e){document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble" style="color:#e74c3c">${lang==='ka'?'შეცდომა':'Error'}</div></div>`;}
   msgs.scrollTop=msgs.scrollHeight;
 }
