@@ -196,7 +196,12 @@ body{font-family:'Noto Sans Georgian',sans-serif;background:var(--dark);color:va
 .cert-paper>*{position:relative;z-index:1;}
 .cert-outer-border{position:absolute;inset:6px;border:2px solid #C0272D;pointer-events:none;z-index:2;}
 .cert-inner-border{position:absolute;inset:10px;border:1px solid rgba(192,39,45,.35);pointer-events:none;z-index:2;}
-@media print{body>*:not(#certPage){display:none!important;}#certPage{background:white!important;padding:0!important;min-height:unset!important;}.cert-actions{display:none!important;}.cert-paper{box-shadow:none!important;max-width:100%!important;width:297mm!important;padding:16mm 20mm!important;}}
+@media print{body>*:not(#certPage){display:none!important;}#certPage{background:white!important;padding:0!important;min-height:unset!important;}.cert-actions{display:none!important;}.cert-paper{box-shadow:none!important;max-width:100%!important;width:297mm!important;padding:16mm 20mm!important;}.cert-paper.cert-locked{display:none!important;}.cert-pay-overlay{display:none!important;}}
+.cert-pay-gate{position:relative;width:100%;max-width:1080px;}
+.cert-paper.cert-locked{filter:blur(6px);pointer-events:none;user-select:none;transform:scale(0.9);transition:all .3s;opacity:.7;}
+.cert-pay-overlay{position:absolute;inset:0;background:rgba(10,10,10,.65);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:3px;z-index:10;backdrop-filter:blur(3px);}
+.cert-pay-box{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--red);border-radius:8px;padding:32px 40px;text-align:center;max-width:360px;width:90%;}
+.cert-valid-stamp{display:inline-block;border:1.5px solid #C0272D;border-radius:3px;padding:2px 8px;font-size:10px;font-family:'Oswald',sans-serif;letter-spacing:1px;color:#C0272D;margin-left:8px;vertical-align:middle;}
 @media(max-width:700px){.player-layout{grid-template-columns:1fr;}.player-sidebar{display:none;}.topnav{padding:12px 16px;}.hero{padding:50px 20px 40px;}.catalog{padding:30px 16px;}.pass-grid{grid-template-columns:repeat(2,1fr);}.stats-bar{gap:24px;}.dash-body{padding:20px 16px;}.player-content{padding:20px 16px;}}
 </style>
 </head>
@@ -361,10 +366,11 @@ body{font-family:'Noto Sans Georgian',sans-serif;background:var(--dark);color:va
 </div>
 
 <div id="certPage" class="page">
-  <div class="cert-actions">
+  <div class="cert-actions" id="certActions">
     <button class="btn-sm btn-outline" onclick="showPage('dashboard')">← <span id="certBackTxt">კაბინეტი</span></button>
-    <button class="btn-sm btn-red" onclick="downloadCert()">⬇ <span id="certDlTxt">გადმოწერა</span></button>
+    <span id="certDlBtn"></span>
   </div>
+  <div class="cert-pay-gate" id="certPayGate">
   <div class="cert-paper" id="certPaper">
     <div class="cert-outer-border"></div>
     <div class="cert-inner-border"></div>
@@ -428,6 +434,10 @@ body{font-family:'Noto Sans Georgian',sans-serif;background:var(--dark);color:va
           <span style="font-size:11px;font-weight:700;color:#222;font-family:'Oswald',sans-serif;letter-spacing:.5px">DATE OF ISSUE / გაცემის თარიღი:&nbsp;</span>
           <span id="certDt" style="font-size:11px;font-weight:700;color:#111;border-bottom:1px solid #444;padding-bottom:1px"></span>
         </div>
+        <div style="margin-bottom:7px">
+          <span style="font-size:11px;font-weight:700;color:#C0272D;font-family:'Oswald',sans-serif;letter-spacing:.5px">VALID UNTIL / ძალაშია:&nbsp;</span>
+          <span id="certValidUntil" style="font-size:11px;font-weight:700;color:#C0272D;border-bottom:1.5px solid #C0272D;padding-bottom:1px"></span>
+        </div>
         <div style="font-size:10px;color:#777;margin-bottom:6px;font-family:'Oswald',sans-serif">Member of / წევრი:</div>
         <!-- EFVET + EVBB logos (text-based) -->
         <div style="display:flex;gap:10px;align-items:center">
@@ -457,6 +467,19 @@ body{font-family:'Noto Sans Georgian',sans-serif;background:var(--dark);color:va
       </div>
     </div>
   </div>
+
+  <!-- Payment overlay (shown when cert not purchased) -->
+  <div class="cert-pay-overlay" id="certPayOverlay" style="display:none">
+    <div class="cert-pay-box">
+      <div style="font-size:52px;margin-bottom:8px">🔒</div>
+      <h3 style="font-size:19px;margin-bottom:6px" id="certPayTitle">სერთიფიკატის ჩამოტვირთვა</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;line-height:1.6" id="certPayDesc">ოფიციალური PDF სერთიფიკატის გადმოსაწერად გადაიხადეთ</p>
+      <div style="font-size:40px;font-weight:800;color:var(--red);margin-bottom:20px">₾15</div>
+      <button class="btn-lg red" style="width:100%;font-size:15px" onclick="payCert()">💳 <span id="certPayBtn">გადახდა Stripe-ით</span></button>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px">🔐 უსაფრთხო გადახდა · Visa / Mastercard</p>
+    </div>
+  </div>
+  </div><!-- /cert-pay-gate -->
 </div>
 
 <script>
@@ -490,7 +513,46 @@ const COURSES=[
 const OHS_LESSONS={
   ka:[
     {chapter:'შესავალი',title:'ტრენინგის მიზანი და პროგრამა',content:`<div class="content-card"><h4>ტრენინგის მიზნები</h4><ul class="content-list"><li>სამუშაო ადგილზე საფრთხეების ამოცნობა</li><li>რისკების მართვის სწავლა</li><li>უსაფრთხო სამუშაო პრაქტიკის დანერგვა</li><li>საგანგებო სიტუაციებში სწორი მოქმედება</li></ul></div><div class="info-box"><strong>💡</strong> უსაფრთხოება მხოლოდ წესები არ არის — ეს ორგანიზაციის კულტურაა.</div>`},
-    {chapter:'ნაწ. 1',title:'შრომის უსაფრთხოების საფუძვლები',content:`<div class="content-card"><h4>რა არის შრომის უსაფრთხოება?</h4><div class="steps"><div class="step-item"><div class="step-num">🏢</div><div class="step-body"><strong>სამუშაო გარემოს უსაფრთხოება</strong><p>ფიზიკური სივრცის, აღჭურვილობის კონტროლი</p></div></div><div class="step-item"><div class="step-num">❤️</div><div class="step-body"><strong>ჯანმრთელობის დაცვა</strong><p>სხეულრივი და გონებრივი ჯანმრთელობა</p></div></div><div class="step-item"><div class="step-num">🛡</div><div class="step-body"><strong>უბედური შემთხვევების პრევენცია</strong><p>საფრთხეების წინასწარი იდენტიფიკაცია</p></div></div></div></div><div class="info-box"><strong>შრომის უსაფრთხოება = პრევენცია + მართვა + კულტურა</strong></div>`},
+    {chapter:'ნაწ. 1',title:'შრომის უსაფრთხოების საფუძვლები',content:`
+<div class="content-card"><h4>1. რა არის შრომის უსაფრთხოება?</h4>
+<p style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:12px">შრომის უსაფრთხოება წარმოადგენს ორგანიზაციულ, ტექნიკურ და სამართლებრივ ღონისძიებათა ერთობლიობას, რომელიც მიზნად ისახავს დასაქმებულთა სიცოცხლის, ჯანმრთელობისა და კეთილდღეობის დაცვას სამუშაო პროცესში.</p>
+<div class="steps">
+<div class="step-item"><div class="step-num">📌</div><div class="step-body"><strong>საქართველოს ორგანული კანონი „შრომის უსაფრთხოების შესახებ"</strong><p>მუხლი 3 – განსაზღვრავს ძირითად ცნებებს · მუხლი 4 – დამსაქმებლის ვალდებულება</p></div></div>
+<div class="step-item"><div class="step-num">👉</div><div class="step-body"><strong>პრაქტიკული მაგალითი</strong><p>მუშები იყენებენ დამცავ ჩაფხუტს და უსაფრთხოების ქამარს სიმაღლეზე — ეს არის შრომის უსაფრთხოების განხორციელება.</p></div></div>
+</div></div>
+<div class="content-card"><h4>2. შრომის უსაფრთხოების სისტემა</h4>
+<p style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:12px">მართვის ორგანიზებული სტრუქტურა, რომელიც მოიცავს პოლიტიკას, პროცედურებს, პროცესებსა და რესურსებს. დაფუძნებულია <strong>ISO 45001</strong> სტანდარტსა და <strong>ILO-OSH 2001</strong> სახელმძღვანელოზე.</p>
+<div class="steps">
+<div class="step-item"><div class="step-num" style="background:#3498db">1</div><div class="step-body"><strong>პოლიტიკა</strong></div></div>
+<div class="step-item"><div class="step-num" style="background:#2ecc71">2</div><div class="step-body"><strong>დაგეგმვა</strong></div></div>
+<div class="step-item"><div class="step-num" style="background:#f39c12">3</div><div class="step-body"><strong>განხორციელება</strong></div></div>
+<div class="step-item"><div class="step-num" style="background:var(--red)">4</div><div class="step-body"><strong>მონიტორინგი & გაუმჯობესება</strong></div></div>
+</div></div>
+<div class="content-card"><h4>3. საფრთხე, რისკი და რისკების შეფასება</h4>
+<div class="table-block"><table class="styled-table">
+<tr><th>ტერმინი</th><th>განმარტება</th><th>მაგალითი</th></tr>
+<tr><td><strong>საფრთხე (Hazard)</strong></td><td>ზიანის გამომწვევი ფაქტორი</td><td>სველი იატაკი</td></tr>
+<tr><td><strong>რისკი (Risk)</strong></td><td>ზიანის ალბათობა + სიმძიმე</td><td>დაცემა</td></tr>
+<tr><td><strong>რისკების შეფასება</strong></td><td>რისკის დონის განსაზღვრა</td><td>შეფასების დოკუმენტი</td></tr>
+</table></div>
+<p style="font-size:12px;color:var(--muted);margin-top:8px">📌 მუხლი 8 – რისკების შეფასების ვალდებულება</p>
+</div>
+<div class="content-card"><h4>4. პრევენციის იერარქია</h4>
+<div class="steps">
+<div class="step-item"><div class="step-num" style="background:#C0272D">1</div><div class="step-body"><strong>საფრთხის აღმოფხვრა</strong><p>ყველაზე ეფექტური მეთოდი</p></div></div>
+<div class="step-item"><div class="step-num" style="background:#e67e22">2</div><div class="step-body"><strong>ჩანაცვლება</strong><p>ნაკლებად საშიში ალტერნატივა</p></div></div>
+<div class="step-item"><div class="step-num" style="background:#f39c12">3</div><div class="step-body"><strong>საინჟინრო კონტროლი</strong></div></div>
+<div class="step-item"><div class="step-num" style="background:#3498db">4</div><div class="step-body"><strong>ადმინისტრაციული ზომები</strong></div></div>
+<div class="step-item"><div class="step-num" style="background:#2ecc71">5</div><div class="step-body"><strong>PPE — ინდივიდუალური დაცვის საშუალებები</strong></div></div>
+</div></div>
+<div class="content-card"><h4>5. სამუშაო გარემო & ჯანმრთელობა</h4>
+<div class="steps">
+<div class="step-item"><div class="step-num">🏢</div><div class="step-body"><strong>ფიზიკური გარემო</strong><p>განათება, ტემპერატურა, ხმაური, ერგონომიკა</p></div></div>
+<div class="step-item"><div class="step-num">🔬</div><div class="step-body"><strong>ქიმიური & ბიოლოგიური ფაქტორები</strong><p>მტვრიან გარემოში — რესპირატორი სავალდებულოა</p></div></div>
+<div class="step-item"><div class="step-num">🧠</div><div class="step-body"><strong>გონებრივი ჯანმრთელობა</strong><p>სტრესის მართვა, სამუშაო-დასვენების ბალანსი</p></div></div>
+<div class="step-item"><div class="step-num">⚙️</div><div class="step-body"><strong>აღჭურვილობის კონტროლი</strong><p>ყოველდღიური ვიზუალური + პერიოდული ტექნიკური შემოწმება</p></div></div>
+</div></div>
+<div class="info-box"><strong>შრომის უსაფრთხოება = პრევენცია + მართვა + კულტურა</strong><br><span style="font-size:12px;color:var(--muted)">📌 მუხლი 4 — დამსაქმებელი ვალდებულია უზრუნველყოს უსაფრთხო სამუშაო გარემო</span></div>`},
     {chapter:'ნაწ. 2',title:'კანონმდებლობა',content:`<div class="table-block"><table class="styled-table"><tr><th>დამსაქმებელი</th><th>დასაქმებული</th></tr><tr><td>უსაფრთხო გარემოს შექმნა</td><td>წესების დაცვა</td></tr><tr><td>რისკების შეფასება</td><td>საფრთხის შეტყობინება</td></tr><tr><td>სწავლება და ტრენინგი</td><td>დაცვის საშუალებების გამოყენება</td></tr></table></div><div class="info-box"><strong>💡</strong> კანონი ავალდებულებს დამსაქმებელს — უზრუნველყოს უსაფრთხო სამუშაო გარემო.</div>`},
     {chapter:'ნაწ. 3',title:'ISO 45001 — PDCA',content:`<div class="content-card"><h4>PDCA ციკლი</h4><div class="steps"><div class="step-item"><div class="step-num" style="background:#3498db">P</div><div class="step-body"><strong>PLAN — დაგეგმვა</strong></div></div><div class="step-item"><div class="step-num" style="background:#2ecc71">D</div><div class="step-body"><strong>DO — შესრულება</strong></div></div><div class="step-item"><div class="step-num" style="background:#f39c12">C</div><div class="step-body"><strong>CHECK — შემოწმება</strong></div></div><div class="step-item"><div class="step-num" style="background:var(--red)">A</div><div class="step-body"><strong>ACT — გაუმჯობესება</strong></div></div></div></div>`},
     {chapter:'ნაწ. 4',title:'ოფისის საფრთხეები',content:`<div class="content-card"><h4>გავრცელებული საფრთხეები:</h4><ul class="content-list"><li>მიმოფანტული კაბელები — დაცემის რისკი</li><li>სველი იატაკი — სრიალის საფრთხე</li><li>არასათანადო განათება — თვალის დაღლა</li><li>გადატვირთული გასასვლელები</li></ul></div><div class="info-box"><strong>💡 სუფთა სამუშაო სივრცე = უსაფრთხო სამუშაო სივრცე</strong></div>`},
@@ -545,28 +607,28 @@ const FIRE_LESSONS={
 // ============================================================
 const OHS_QUIZ={
   ka:[
-    {q:'რა არის შრომის უსაფრთხოების მთავარი მიზანი?',opts:['კომპანიის მოგება','თანამშრომლების დაცვა და პრევენცია','ოფისის გაფორმება','ხელფასის ზრდა'],c:1},
-    {q:'PDCA ციკლში P ასო რას ნიშნავს?',opts:['Performance','Prevention','Plan — დაგეგმვა','Protection'],c:2},
-    {q:'PASS მეთოდში A ასო რას ნიშნავს?',opts:['ACT','AIM — მიუმართეთ ძირს','ACTIVATE','ALERT'],c:1},
-    {q:'მონიტორი რა მანძილზე უნდა იყოს?',opts:['20 სმ','50-70 სმ','1 მ','30 სმ'],c:1},
-    {q:'ევაკუაციისას რომელი გზა?',opts:['ლიფტი','სახურავი','სასწრაფო კიბე','ფანჯარა'],c:2},
-    {q:'ელ. დარტყმისას პირველი ნაბიჯი?',opts:['შეეხეთ','გამოთიშეთ ქსელი, შემდეგ დახმარება','112','წყალი'],c:1},
-    {q:'ოფისის გასასვლელის მინ. სიგანე?',opts:['50 სმ','90 სმ','120 სმ','60 სმ'],c:1},
-    {q:'დამწვრობისას?',opts:['ზეთი','10-20 წთ ცივი წყალი','ცხელი წყალი','ბამბა'],c:1},
-    {q:'ერგონომიული გარემო დაავადებებს?',opts:['10%','20%','40%','5%'],c:2},
-    {q:'საგანგებო ნომერი?',opts:['911','101','112','999'],c:2}
+    {q:'რა არის შრომის უსაფრთხოების ძირითადი მიზანი?',opts:['წარმოების ზრდა','დასაქმებულთა სიცოცხლისა და ჯანმრთელობის დაცვა','მოგების გაზრდა','კონტროლის შემცირება'],c:1},
+    {q:'რომელი ტერმინი ნიშნავს ზიანის მიყენების შესაძლებლობას?',opts:['რისკი','საფრთხე','პრევენცია','კონტროლი'],c:1},
+    {q:'რისკი განისაზღვრება როგორც:',opts:['მხოლოდ საფრთხის არსებობა','ზიანის სიმძიმე','ზიანის ალბათობა და სიმძიმე ერთად','სამუშაო გარემოს შეფასება'],c:2},
+    {q:'რისკების შეფასების მიზანია:',opts:['მხოლოდ დოკუმენტაციის შექმნა','საფრთხეების აღმოფხვრა ან შემცირება','სამუშაოს დაჩქარება','თანამშრომლების კონტროლი'],c:1},
+    {q:'რომელი არის პრევენციის იერარქიის პირველი ეტაპი?',opts:['PPE გამოყენება','ადმინისტრაციული კონტროლი','საფრთხის აღმოფხვრა','ტრენინგი'],c:2},
+    {q:'ISO 45001 სტანდარტი ეხება:',opts:['ხარისხის მართვას','გარემოს დაცვას','შრომის უსაფრთხოების მართვის სისტემას','ფინანსურ კონტროლს'],c:2},
+    {q:'პროფესიული დაავადებების პრევენციისთვის საჭიროა:',opts:['მხოლოდ ხელფასის ზრდა','პერიოდული სამედიცინო შემოწმება და PPE','სამუშაოს შეწყვეტა','ახალი ოფისი'],c:1},
+    {q:'სამუშაო გარემოს რისკების შეფასება ვალდებულია:',opts:['მხოლოდ სამშენებლო კომპანიებს','ყველა დამსაქმებელს','50+ თანამშრომლის შემთხვევაში','მხოლოდ ქარხნებს'],c:1},
+    {q:'პრევენციის იერარქიაში PPE (დამცავი საშუალებები) მოდის:',opts:['პირველ ადგილზე','მეორე ადგილზე','ბოლო — მე-5 ადგილზე','მე-3 ადგილზე'],c:2},
+    {q:'საგანგებო ნომერი საქართველოში:',opts:['911','101','112','999'],c:2}
   ],
   en:[
-    {q:'Main goal of occupational safety?',opts:['Increase profits','Protect employees and prevent accidents','Decorate offices','Raise salaries'],c:1},
-    {q:'In PDCA, P stands for?',opts:['Performance','Prevention','Plan','Protection'],c:2},
-    {q:'In PASS, A stands for?',opts:['ACT','AIM at base of fire','ACTIVATE','ALERT'],c:1},
-    {q:'Monitor distance from eyes?',opts:['20 cm','50-70 cm','1 m','30 cm'],c:1},
-    {q:'During evacuation, use?',opts:['Elevator','Roof','Emergency stairs','Window'],c:2},
-    {q:'First step for electric shock?',opts:['Touch victim','Disconnect power, then assist','Call 112','Pour water'],c:1},
-    {q:'Minimum exit width?',opts:['50 cm','90 cm','120 cm','60 cm'],c:1},
-    {q:'For a burn?',opts:['Apply oil','Cool with cold water 10-20 min','Hot water','Cotton'],c:1},
-    {q:'Ergonomic environment reduces disease by?',opts:['10%','20%','40%','5%'],c:2},
-    {q:'Emergency number in Georgia?',opts:['911','101','112','999'],c:2}
+    {q:'What is the primary goal of occupational safety?',opts:['Increase production','Protect employees\' life and health','Increase profits','Reduce controls'],c:1},
+    {q:'Which term means the potential to cause harm?',opts:['Risk','Hazard','Prevention','Control'],c:1},
+    {q:'Risk is defined as:',opts:['Presence of a hazard only','Severity of harm','Probability and severity of harm combined','Workplace assessment'],c:2},
+    {q:'The goal of risk assessment is:',opts:['Only to create documentation','To eliminate or reduce hazards','To speed up work','To control employees'],c:1},
+    {q:'Which is the FIRST step in the prevention hierarchy?',opts:['PPE use','Administrative controls','Elimination of the hazard','Training'],c:2},
+    {q:'ISO 45001 standard covers:',opts:['Quality management','Environmental protection','Occupational safety management system','Financial controls'],c:2},
+    {q:'Prevention of occupational diseases requires:',opts:['Only salary increases','Periodic medical checks and PPE','Stopping work','New office'],c:1},
+    {q:'Risk assessment is mandatory for:',opts:['Only construction companies','All employers','Companies with 50+ employees','Only factories'],c:1},
+    {q:'PPE (personal protective equipment) is placed in the hierarchy:',opts:['First','Second','Last — 5th position','Third'],c:2},
+    {q:'Emergency number in Georgia:',opts:['911','101','112','999'],c:2}
   ]
 };
 
@@ -983,7 +1045,7 @@ async function sendAI(){
   const l=COURSE_LESSONS[activeCourse.id]?.[lang]?.[activeLesson];
   try{
     const GEMINI_KEY='AIzaSyCFbPBPmnkB2jGq2bVCm1-5KnsFYr_uf1M';
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{parts:[{text:`You are Safety Academia's AI assistant. Current lesson: "${l?.title||'General'}". Always respond in the same language the user writes in. Be concise and practical about occupational safety.\n\nUser: ${msg}`}]}],generationConfig:{maxOutputTokens:800,temperature:0.7}})});
     if(!r.ok){const err=await r.text();throw new Error('HTTP '+r.status+': '+err);}
     const d=await r.json();
@@ -1063,43 +1125,108 @@ async function saveCert(){
 }
 
 // ============================================================
+// CERTIFICATE PAYMENT
+// ============================================================
+// Replace with your actual Stripe Payment Link from dashboard.stripe.com
+const STRIPE_CERT_LINK='https://buy.stripe.com/REPLACE_WITH_YOUR_LINK';
+
+function isCertPaid(courseId){return localStorage.getItem('cert_paid_'+courseId)==='1';}
+function setCertPaid(courseId){localStorage.setItem('cert_paid_'+courseId,'1');}
+
+function payCert(){
+  const cid=activeCourse?.id||localStorage.getItem('cert_view_course');
+  if(!cid)return;
+  localStorage.setItem('cert_pending',cid);
+  // Stripe success URL must be set in Stripe Dashboard to:
+  // https://safetyacademiacollege.github.io/elearning/?payment=success
+  window.location.href=STRIPE_CERT_LINK;
+}
+
+function checkPaymentReturn(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('payment')==='success'){
+    const pendingId=localStorage.getItem('cert_pending');
+    if(pendingId){
+      setCertPaid(pendingId);
+      localStorage.removeItem('cert_pending');
+    }
+    history.replaceState({},'',location.pathname);
+    // Auto-open the certificate after return
+    if(pendingId&&currentUser){
+      const cert=currentUser.certs.find(c=>c.courseId===pendingId);
+      if(cert){
+        const course=COURSES.find(c=>c.id===pendingId);
+        if(course)activeCourse=course;
+        setTimeout(()=>showCert(),300);
+      }
+    }
+  }
+}
+
+// ============================================================
 // CERTIFICATE
 // ============================================================
 function showCert(idx){
   const cert=idx!==undefined?currentUser.certs[idx]:currentUser.certs.find(c=>c.courseId===activeCourse?.id);
   if(!cert)return;
+  // Store which course cert is being viewed (for payment return)
+  localStorage.setItem('cert_view_course',cert.courseId);
+  if(cert.courseId&&COURSES.find(c=>c.id===cert.courseId))activeCourse=COURSES.find(c=>c.id===cert.courseId);
   showPage('certPage');
+  // Fill cert fields
   document.getElementById('certRecip').textContent=currentUser.name;
   document.getElementById('certCourseNm').textContent=(lang==='ka'?'პროგრამა: ':'Program: ')+(cert.courseName||'');
   document.getElementById('certDt').textContent=cert.date||'';
   document.getElementById('certCN').textContent=cert.cn||'';
   document.getElementById('certTH').textContent=cert.th?`${cert.th} სთ / h`:'';
+  // Compute and show validity date on cert paper
+  const cs=getCertStatus(cert.courseId);
+  document.getElementById('certValidUntil').textContent=cs.expiryFmt||'';
   document.getElementById('certBackTxt').textContent=t('certBackTxt');
-  document.getElementById('certDlTxt').textContent=t('certDlTxt');
+  // Payment gate
+  const paid=isCertPaid(cert.courseId);
+  const paper=document.getElementById('certPaper');
+  const overlay=document.getElementById('certPayOverlay');
+  const dlBtn=document.getElementById('certDlBtn');
+  if(paid){
+    paper.classList.remove('cert-locked');
+    overlay.style.display='none';
+    dlBtn.innerHTML=`<button class="btn-sm btn-red" onclick="downloadCert()">⬇ ${lang==='ka'?'გადმოწერა':'Download'}</button>`;
+  }else{
+    paper.classList.add('cert-locked');
+    overlay.style.display='flex';
+    dlBtn.innerHTML='';
+    // Update overlay text for language
+    document.getElementById('certPayTitle').textContent=lang==='ka'?'სერთიფიკატის ჩამოტვირთვა':'Download Certificate';
+    document.getElementById('certPayDesc').textContent=lang==='ka'?'ოფიციალური PDF სერთიფიკატის გადმოსაწერად გადაიხადეთ':'Pay to download your official PDF certificate';
+    document.getElementById('certPayBtn').textContent=lang==='ka'?'გადახდა Stripe-ით':'Pay with Stripe';
+  }
 }
 
 function viewCert(i){showCert(i);}
 
 async function downloadCert(){
-  const btn=document.querySelector('.cert-actions .btn-sm.btn-red');
-  const orig=btn.innerHTML;btn.innerHTML='⏳...';btn.disabled=true;
-  try{
-    if(!window.html2canvas)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-    if(!window.jspdf)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-    const paper=document.getElementById('certPaper');
-    const canvas=await html2canvas(paper,{scale:2.5,backgroundColor:'#ffffff',logging:false,useCORS:true});
-    const imgData=canvas.toDataURL('image/png');
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-    const pW=pdf.internal.pageSize.getWidth();
-    const pH=pdf.internal.pageSize.getHeight();
-    const iW=canvas.width;const iH=canvas.height;
-    const ratio=Math.min(pW/iW,pH/iH);
-    const fW=iW*ratio;const fH=iH*ratio;
-    pdf.addImage(imgData,'PNG',(pW-fW)/2,(pH-fH)/2,fW,fH);
-    pdf.save(`Safety_Academia_${(currentUser?.name||'cert').replace(/\s+/g,'_')}.pdf`);
-  }catch(e){alert(lang==='ka'?'შეცდომა':'Error');console.error(e);}
-  btn.innerHTML=orig;btn.disabled=false;
+  const cert=currentUser.certs.find(c=>c.courseId===activeCourse?.id)||currentUser.certs.find(c=>c.courseId===localStorage.getItem('cert_view_course'));
+  if(!cert||!isCertPaid(cert.courseId)){return;}
+  const btn=document.getElementById('certDlBtn').querySelector('button');
+  if(btn){const orig=btn.innerHTML;btn.innerHTML='⏳...';btn.disabled=true;
+    try{
+      if(!window.html2canvas)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+      if(!window.jspdf)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      const paper=document.getElementById('certPaper');
+      const canvas=await html2canvas(paper,{scale:2.5,backgroundColor:'#ffffff',logging:false,useCORS:true});
+      const imgData=canvas.toDataURL('image/png');
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+      const pW=pdf.internal.pageSize.getWidth();const pH=pdf.internal.pageSize.getHeight();
+      const iW=canvas.width;const iH=canvas.height;
+      const ratio=Math.min(pW/iW,pH/iH);
+      const fW=iW*ratio;const fH=iH*ratio;
+      pdf.addImage(imgData,'PNG',(pW-fW)/2,(pH-fH)/2,fW,fH);
+      pdf.save(`Safety_Academia_${(currentUser?.name||'cert').replace(/\s+/g,'_')}.pdf`);
+    }catch(e){alert(lang==='ka'?'შეცდომა':'Error');console.error(e);}
+    btn.innerHTML=orig;btn.disabled=false;
+  }
 }
 
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
@@ -1114,6 +1241,7 @@ async function init(){
   await loadUsers();await loadSession();
   updateNavUser();applyLang();renderCatalog();
   if(currentUser)renderDashboard();
+  checkPaymentReturn();
 }
 init();
 </script>
