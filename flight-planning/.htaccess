@@ -1,0 +1,16 @@
+# Flight Planning app — Hostinger (Apache/LiteSpeed) settings
+AddType application/manifest+json .webmanifest
+DirectoryIndex index.html
+
+# Always revalidate the page and service worker so students get updates promptly.
+<FilesMatch "^(index\.html|sw\.js|manifest\.webmanifest)$">
+  Header set Cache-Control "no-cache"
+</FilesMatch>
+<FilesMatch "\.(png|svg)$">
+  Header set Cache-Control "public, max-age=2592000"
+</FilesMatch>
+
+# Force HTTPS (offline mode requires it)
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
