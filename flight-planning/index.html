@@ -1,0 +1,1831 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ULA and Light Aircraft Flight Computer — Safety Academia</title>
+<meta name="description" content="VFR flight planning computer for ultralight and light aircraft in Georgia: legs, wind triangle, fuel, density-altitude runway performance and ICAO flight plan.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#26467F">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Flight Planning">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDF0E8; --ink:#1B2620; --ink-dim:#54635A;
+    --route:#26467F; --route-soft:#5A79B3; --amber:#A6690C; --amber-soft:#C98A2E;
+    --red:#A6320C; --green:#2E6B37;
+    --grid:rgba(27,38,32,.14); --card:#F7F8F2; --card-2:#E7EAE0; --card-border:rgba(27,38,32,.16);
+    --input-bg:#FFFFFF; --input-border:rgba(27,38,32,.28);
+    --shadow: 0 1px 2px rgba(27,38,32,.06), 0 8px 24px -12px rgba(27,38,32,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#10161A; --ink:#DEE7E0; --ink-dim:#93A79B;
+      --route:#7C9EDB; --route-soft:#4C6493; --amber:#E0A23C; --amber-soft:#8C6420;
+      --red:#E0704A; --green:#5FB86C;
+      --grid:rgba(222,231,224,.12); --card:#161F1A; --card-2:#1C2620; --card-border:rgba(222,231,224,.14);
+      --input-bg:#0D1310; --input-border:rgba(222,231,224,.24);
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#10161A; --ink:#DEE7E0; --ink-dim:#93A79B;
+    --route:#7C9EDB; --route-soft:#4C6493; --amber:#E0A23C; --amber-soft:#8C6420;
+    --red:#E0704A; --green:#5FB86C;
+    --grid:rgba(222,231,224,.12); --card:#161F1A; --card-2:#1C2620; --card-border:rgba(222,231,224,.14);
+    --input-bg:#0D1310; --input-border:rgba(222,231,224,.24);
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--paper); color:var(--ink); font-family:'Public Sans',system-ui,sans-serif; padding:24px 18px 44px; max-width:1240px; margin:0 auto;}
+  h1,h2,h3{font-family:'Barlow Condensed',sans-serif; margin:0; text-wrap:balance;}
+  .eyebrow{font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; letter-spacing:.14em; font-size:12px; color:var(--ink-dim); font-weight:600;}
+  header{display:flex; flex-wrap:wrap; gap:14px 24px; align-items:flex-end; justify-content:space-between; border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:18px;}
+  header h1{font-size:clamp(26px,4vw,38px); font-weight:700;}
+  .subline{font-size:13.5px; color:var(--ink-dim); margin-top:3px; max-width:56ch;}
+
+  .tabs{display:flex; flex-wrap:wrap; gap:6px; background:var(--card-2); border:1px solid var(--card-border); border-radius:7px; padding:4px;}
+  .perf-only{display:none;}
+  .fuel-only{display:none;}
+  .fpl-only{display:none;}
+  .custom-only{display:none;}
+  .local-only{display:none;}
+  .wp-row{display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:13px;}
+  .wp-row .wp-idx{font-family:'JetBrains Mono',monospace; color:var(--ink-dim); width:18px;}
+  .wp-row .wp-code{font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--route);}
+  .wp-row .wp-name{color:var(--ink-dim); flex:1;}
+  .wp-row button{font-size:11px; padding:3px 8px; border-radius:4px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--ink); cursor:pointer;}
+  .wp-controls{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .wp-controls select{font-family:'Public Sans',sans-serif; font-size:13px; background:var(--input-bg); color:var(--ink); border:1px solid var(--input-border); border-radius:4px; padding:6px 8px;}
+  .wp-controls button{font-family:'Public Sans',sans-serif; font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:5px; border:1px solid var(--route); background:transparent; color:var(--route); cursor:pointer;}
+  .wp-controls button.secondary{border-color:var(--input-border); color:var(--ink-dim);}
+  .tab{font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:14.5px; letter-spacing:.02em; padding:7px 14px; border-radius:5px; border:none; background:transparent; color:var(--ink-dim); cursor:pointer;}
+  .tab[aria-selected="true"]{background:var(--route); color:#fff;}
+
+  .layout{display:grid; grid-template-columns:300px minmax(0,1fr); gap:18px; align-items:start;}
+  @media (max-width:900px){ .layout{grid-template-columns:1fr;} }
+
+  .panel{background:var(--card); border:1px solid var(--card-border); border-radius:6px; box-shadow:var(--shadow); padding:15px 16px;}
+  .panel + .panel{margin-top:16px;}
+  .panel h2{font-size:13.5px; text-transform:uppercase; letter-spacing:.08em; font-weight:600; color:var(--ink-dim); margin-bottom:12px;}
+  .panel h2 .badge{float:right; font-family:'Public Sans',sans-serif; text-transform:none; letter-spacing:0; font-weight:500; font-size:10.5px; color:var(--route);}
+
+  .field{margin-bottom:12px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block; font-size:12.5px; color:var(--ink-dim); margin-bottom:4px; font-weight:500;}
+  .field input[type="number"], .field input[type="text"], .field input[type="date"], .field select, .field textarea{
+    width:100%; font-family:'JetBrains Mono',monospace; font-size:14px; font-variant-numeric:tabular-nums;
+    background:var(--input-bg); color:var(--ink); border:1px solid var(--input-border); border-radius:4px; padding:7px 9px;
+  }
+  .field select{font-family:'Public Sans',sans-serif;}
+  .field textarea{font-family:'Public Sans',sans-serif; font-size:13px; resize:vertical; min-height:56px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .check{display:flex; align-items:center; gap:8px; font-size:13.5px; margin-bottom:10px;}
+  .check input{width:16px; height:16px;}
+  .hint{font-size:11px; color:var(--ink-dim); margin-top:3px;}
+
+  .legwind-row{display:grid; grid-template-columns:1fr 64px 64px; gap:8px; align-items:center; margin-bottom:9px;}
+  .legwind-row:last-child{margin-bottom:0;}
+  .legwind-row .lw-label{font-size:11.5px; color:var(--ink-dim); line-height:1.25;}
+  .legwind-row input{width:100%; font-family:'JetBrains Mono',monospace; font-size:12.5px; font-variant-numeric:tabular-nums;
+    background:var(--input-bg); color:var(--ink); border:1px solid var(--input-border); border-radius:4px; padding:5px 6px; text-align:center;}
+  .legwind-head{display:grid; grid-template-columns:1fr 64px 64px; gap:8px; margin-bottom:7px;}
+  .legwind-head span{font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-dim); text-align:center;}
+  .legwind-head span:first-child{text-align:left;}
+
+  .stat-row{display:flex; flex-wrap:wrap; gap:10px 22px; margin-bottom:4px;}
+  .stat{min-width:110px;}
+  .stat .k{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-dim); font-weight:600;}
+  .stat .v{font-family:'JetBrains Mono',monospace; font-size:20px; font-variant-numeric:tabular-nums; font-weight:500;}
+
+  .pill{display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:.05em; font-size:12.5px; text-transform:uppercase; padding:3px 10px; border-radius:20px;}
+  .pill.ok{background:color-mix(in srgb, var(--green) 18%, transparent); color:var(--green); border:1px solid var(--green);}
+  .pill.warn{background:color-mix(in srgb, var(--amber) 18%, transparent); color:var(--amber); border:1px solid var(--amber);}
+  .pill.bad{background:color-mix(in srgb, var(--red) 18%, transparent); color:var(--red); border:1px solid var(--red);}
+
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  table.wide{table-layout:fixed;}
+  th{text-align:left; font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; letter-spacing:.05em; font-size:10.8px; color:var(--ink-dim); font-weight:600; padding:0 8px 7px 0; border-bottom:1px solid var(--grid); white-space:nowrap;}
+  td{padding:8px 8px 8px 0; border-bottom:1px solid var(--grid); vertical-align:middle;}
+  td.num{font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  tr:last-child td{border-bottom:none;}
+  tr.total td{font-weight:700; border-top:2px solid var(--ink); border-bottom:none; padding-top:10px;}
+  .table-wrap{overflow-x:auto;}
+
+  .ap-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:4px;}
+  .ap-card{border:1px solid var(--card-border); background:var(--card-2); border-radius:5px; padding:11px 12px;}
+  .ap-card.tof{border-left:3px solid var(--route);}
+  .ap-card.ldg{border-left:3px solid var(--amber);}
+  .ap-card h3{font-size:15px; font-weight:600; margin-bottom:2px;}
+  .ap-card .ap-sub{font-size:11.5px; color:var(--ink-dim); margin-bottom:8px;}
+  .ap-line{display:flex; justify-content:space-between; font-size:12.5px; padding:3px 0; border-bottom:1px dotted var(--grid);}
+  .ap-line:last-child{border-bottom:none;}
+  .ap-line .lbl{color:var(--ink-dim);}
+  .ap-line .val{font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;}
+
+  .ident-legend{display:flex; flex-wrap:wrap; gap:7px 10px;}
+  .ident-chip{display:flex; align-items:baseline; gap:6px; font-size:12.5px; background:var(--card-2); border:1px solid var(--card-border); border-radius:5px; padding:4px 9px;}
+  .ident-chip .code{font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--route); letter-spacing:.02em;}
+  .ident-chip .name{color:var(--ink-dim);}
+
+  footer{margin-top:24px; padding-top:12px; border-top:1px solid var(--grid); font-size:11.5px; color:var(--ink-dim); line-height:1.7;}
+  footer a{color:var(--route);}
+  .caveat{font-size:12px; color:var(--ink-dim); margin-top:10px; line-height:1.5;}
+</style>
+
+<header>
+  <div>
+    <div class="eyebrow">OCC Flight Planning · Live Recalculation</div>
+    <h1>ULA and Light Aircraft Flight Computer</h1>
+    <div class="subline"><span id="acSublineName">Aeroprakt A-32</span> · each leg takes its own wind, temperature and QNH — legs, fuel and runway margins recalculate below. Runway lengths and ATS frequencies are fixed reference data and never change. Base field is Saguramo (private airstrip, pre-certification) — distinct from the nearby AIP-registered Natakhtari field. <a href="https://docs.google.com/document/d/1YcorYIedx5jqWl8FXmtlXKsG-fG_gaoVlCI3zKy6zq0/edit" target="_blank" rel="noopener" style="color:var(--route); font-weight:600;">User Guide ↗</a></div>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Route">
+    <button class="tab" id="tab-r1" role="tab" aria-selected="true">Route 1 · via Kutaisi</button>
+    <button class="tab" id="tab-r2" role="tab" aria-selected="false">Route 2 · via Ambrolauri</button>
+    <button class="tab" id="tab-r3" role="tab" aria-selected="false">Route 3 · Direct (high terrain)</button>
+    <button class="tab" id="tab-custom" role="tab" aria-selected="false">Custom Route</button>
+    <button class="tab" id="tab-local" role="tab" aria-selected="false">Local Flight</button>
+    <button class="tab" id="tab-perf" role="tab" aria-selected="false">Performance Check</button>
+    <button class="tab" id="tab-fuel" role="tab" aria-selected="false">Fuel Planning</button>
+    <button class="tab" id="tab-fpl" role="tab" aria-selected="false">Flight Plan</button>
+  </div>
+</header>
+
+<div class="panel" style="margin-bottom:16px;">
+  <h2>Airport &amp; Waypoint Identifiers</h2>
+  <div id="identLegend" class="ident-legend"></div>
+  <p class="hint">UGAK is a working identifier for Saguramo, not yet AIP-assigned — do not confuse with UGSA, which is Natakhtari's real, AIP-published code.</p>
+</div>
+
+<div class="panel" style="margin-bottom:16px;">
+  <h2>Departure Date &amp; Weather Briefing</h2>
+  <div class="row2">
+    <div class="field"><label for="depDate">Departure date</label><input type="date" id="depDate"></div>
+    <div class="field"><label for="wxTime">Briefing valid/obtained (UTC)</label><input type="text" id="wxTime" placeholder="HHMM"></div>
+  </div>
+  <div class="field"><label for="wxSource">Weather source</label><input type="text" id="wxSource" placeholder="e.g. METAR/TAF, Windy, Mountain-Forecast — ask Claude to research this date's forecast"></div>
+  <div class="field"><label for="wxNotes">Weather briefing notes</label><textarea id="wxNotes" placeholder="Summary of forecast winds/OAT/QNH used for this flight — paste here once researched, then enter the actual figures into the Leg Winds and route-wide conditions fields below"></textarea></div>
+  <p class="hint">This is a static tool with no live weather feed — setting the date does not fetch conditions automatically. It sets Item 18's DOF on the Flight Plan tab. For real forecast conditions, tell Claude the date and route in chat; it will research current/forecast weather (METAR/TAF where available, otherwise nearest-station and model proxies for Saguramo/Ambrolauri/Mestia) and you enter the resulting figures into Leg Winds and Fuel Planning's OAT/QNH.</p>
+</div>
+
+<div class="panel" style="margin-bottom:16px;">
+  <h2>Aircraft <span class="badge">select · configure below</span></h2>
+  <div class="field"><label for="aircraftSelect">Aircraft</label><select id="aircraftSelect"></select></div>
+  <div class="row2">
+    <div class="field"><label for="acEmptyKg">Empty weight (kg)</label><input type="number" id="acEmptyKg" step="0.1" min="0"></div>
+    <div class="field"><label for="acMtowKg">MTOW (kg)</label><input type="number" id="acMtowKg" step="1" min="0"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label for="acVy">Vy — best rate of climb (km/h)</label><input type="number" id="acVy" step="1" min="0"></div>
+    <div class="field"><label for="acClimbSL">Climb rate, sea level (ft/min)</label><input type="number" id="acClimbSL" step="1" min="0"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label for="acToRoll">TO ground roll (m)</label><input type="number" id="acToRoll" step="1" min="0"></div>
+    <div class="field"><label for="acTo15m">TO distance over 15 m (m)</label><input type="number" id="acTo15m" step="1" min="0"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label for="acLdRoll">LDG ground roll (m)</label><input type="number" id="acLdRoll" step="1" min="0"></div>
+    <div class="field"><label for="acLd15m">LDG distance over 15 m (m)</label><input type="number" id="acLd15m" step="1" min="0"></div>
+  </div>
+  <div class="field"><label for="acMaxXwind">Max demonstrated crosswind (km/h)</label><input type="number" id="acMaxXwind" step="0.1" min="0"></div>
+  <div class="row2">
+    <div class="field"><label for="acTank1Cap">Tank 1 capacity (L)</label><input type="number" id="acTank1Cap" step="1" min="0"></div>
+    <div class="field"><label for="acTank2Cap">Tank 2 capacity (L, 0 if none)</label><input type="number" id="acTank2Cap" step="1" min="0"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label for="acEconTas">Economy TAS (km/h)</label><input type="number" id="acEconTas" step="1" min="0"></div>
+    <div class="field"><label for="acEconBurn">Economy burn (L/h)</label><input type="number" id="acEconBurn" step="0.1" min="0"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label for="acNormTas">Normal TAS (km/h)</label><input type="number" id="acNormTas" step="1" min="0"></div>
+    <div class="field"><label for="acNormBurn">Normal burn (L/h)</label><input type="number" id="acNormBurn" step="0.1" min="0"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label for="acConsTas">Conservative TAS (km/h)</label><input type="number" id="acConsTas" step="1" min="0"></div>
+    <div class="field"><label for="acConsBurn">Conservative burn (L/h)</label><input type="number" id="acConsBurn" step="0.1" min="0"></div>
+  </div>
+  <p class="hint" id="acHint">—</p>
+</div>
+
+<div class="layout">
+  <div>
+    <div class="panel custom-only">
+      <h2>Build Route <span class="badge">select waypoints in order</span></h2>
+      <div id="wpList"></div>
+      <div class="wp-controls">
+        <select id="wpAddSelect"></select>
+        <button type="button" id="wpAddBtn">+ Add waypoint</button>
+        <button type="button" id="wpMirrorBtn" class="secondary">Mirror return leg</button>
+        <button type="button" id="wpClearBtn" class="secondary">Clear</button>
+      </div>
+      <p class="hint">Course and distance for each leg are great-circle (straight-line) figures computed from each field's published ARP — accurate enough between lowland fields, but not a substitute for a charted route through mountains. Any leg touching Mestia (UGMS) needs real valley/pass routing and will otherwise understate distance, time and fuel — cross-check against Route 3's own BT/ALI corridor or a real chart before trusting a custom Mestia leg. "Mirror return leg" appends the reverse of the current sequence, for a quick out-and-back nav log — for filing, build and file each direction as its own one-way custom route rather than one mirrored sequence.</p>
+    </div>
+
+    <div class="panel local-only">
+      <h2>Local Flight Setup</h2>
+      <div class="field"><label for="localField">Base aerodrome (departure = destination)</label><select id="localField"></select></div>
+      <div class="field"><label for="localMinutes">Planned local flight duration (minutes)</label><input type="number" id="localMinutes" value="45" min="5" max="300" step="5"></div>
+      <p class="hint">A local flight has no point-to-point distance, so time and fuel are computed directly from this planned duration and the Fuel Planning tab's power setting, rather than from distance and groundspeed. Departure and destination are both filed as this same aerodrome. Set the wind for the movement below in Leg Winds — it applies to both the takeoff and the landing performance cards.</p>
+    </div>
+
+    <div class="panel route-only">
+      <h2>Leg Winds</h2>
+      <div class="legwind-head"><span>Leg</span><span>Dir °T</span><span>kt/h</span></div>
+      <div id="legWindsBody"></div>
+      <p class="hint">Wind FROM direction and speed (km/h), set independently for each leg — mountain legs (e.g. into Mestia) often differ sharply from valley legs.</p>
+    </div>
+
+    <div class="panel route-only">
+      <h2>Conditions</h2>
+      <div class="row2">
+        <div class="field"><label for="oat">OAT at field (°C)</label><input type="number" id="oat" value="15" min="-30" max="45" step="1"></div>
+        <div class="field"><label for="qnh">QNH (hPa)</label><input type="number" id="qnh" value="1013" min="960" max="1040" step="1"></div>
+      </div>
+      <p class="hint">Sea-level-reference temperature and pressure, applied route-wide; each aerodrome's own density altitude is derived from its elevation and the ISA lapse rate.</p>
+    </div>
+
+    <div class="panel route-only">
+      <h2>Cruise</h2>
+      <div class="field"><label for="scenario">Power setting</label>
+        <select id="scenario">
+          <option value="econ">Economy — 150 km/h, 10.5 L/h (book)</option>
+          <option value="norm" selected>Normal — 175 km/h, 13.0 L/h (book)</option>
+          <option value="cons">Conservative real-world — 165 km/h, ~19.5 L/h</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="tas">TAS (km/h)</label><input type="number" id="tas" value="175" min="60" max="220" step="1" disabled></div>
+        <div class="field"><label for="burn">Burn (L/h)</label><input type="number" id="burn" value="13.0" min="5" max="30" step="0.1" disabled></div>
+      </div>
+    </div>
+
+    <div class="panel route-only">
+      <h2>Aircraft &amp; Load</h2>
+      <div class="row2">
+        <div class="field"><label for="pilot">Pilot (kg)</label><input type="number" id="pilot" value="77" min="0" max="150" step="1"></div>
+        <div class="field"><label for="baggage">Baggage (kg)</label><input type="number" id="baggage" value="10" min="0" max="80" step="1"></div>
+      </div>
+      <div class="check"><input type="checkbox" id="paxOn" checked><label for="paxOn" style="margin:0;">Passenger on board</label></div>
+      <div class="field" id="paxWrap"><label for="pax">Passenger (kg)</label><input type="number" id="pax" value="77" min="0" max="150" step="1"></div>
+      <div class="field"><label for="tank">Fuel tanks</label>
+        <select id="tank">
+          <option value="88">Standard — 88 L usable</option>
+          <option value="112">Optional — 112 L usable</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="field" id="fuelLitersWrap" style="display:none;"><label for="fuelLiters">Fuel on board (L)</label><input type="number" id="fuelLiters" value="88" min="0" max="130" step="1"></div>
+      <p class="hint" id="wbNoteHint">—</p>
+    </div>
+
+    <div class="panel route-only">
+      <h2>Alternate / Diversion Fields <span class="badge">extensible</span></h2>
+      <div class="row2">
+        <div class="field"><label for="altWindDir">Wind dir (°T)</label><input type="number" id="altWindDir" value="270" min="0" max="359" step="10"></div>
+        <div class="field"><label for="altWindSpd">Wind speed (km/h)</label><input type="number" id="altWindSpd" value="15" min="0" max="150" step="1"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="altOat">OAT (°C)</label><input type="number" id="altOat" value="15" min="-30" max="45" step="1"></div>
+        <div class="field"><label for="altQnh">QNH (hPa)</label><input type="number" id="altQnh" value="1013" min="960" max="1040" step="1"></div>
+      </div>
+      <p class="hint">Independent check — not tied to a specific leg. One set of conditions evaluated against every candidate alternate at once (Telavi, Natakhtari, Kutaisi, Ambrolauri, Batumi, Tbilisi), compared side by side on the right. More fields are added here as their AIP data is researched; runway/frequency data itself is fixed once entered.</p>
+    </div>
+
+    <div class="panel perf-only">
+      <h2>Takeoff Airfield</h2>
+      <div class="field"><label for="toField">Field</label><select id="toField"></select></div>
+      <div class="row2">
+        <div class="field"><label for="toWindDir">Wind dir (°T)</label><input type="number" id="toWindDir" value="270" min="0" max="359" step="10"></div>
+        <div class="field"><label for="toWindSpd">Wind speed (km/h)</label><input type="number" id="toWindSpd" value="15" min="0" max="150" step="1"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="toOat">OAT (°C)</label><input type="number" id="toOat" value="15" min="-30" max="45" step="1"></div>
+        <div class="field"><label for="toQnh">QNH (hPa)</label><input type="number" id="toQnh" value="1013" min="960" max="1040" step="1"></div>
+      </div>
+    </div>
+
+    <div class="panel perf-only">
+      <h2>Landing Airport</h2>
+      <div class="field"><label for="ldField">Field</label><select id="ldField"></select></div>
+      <div class="row2">
+        <div class="field"><label for="ldWindDir">Wind dir (°T)</label><input type="number" id="ldWindDir" value="270" min="0" max="359" step="10"></div>
+        <div class="field"><label for="ldWindSpd">Wind speed (km/h)</label><input type="number" id="ldWindSpd" value="15" min="0" max="150" step="1"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="ldOat">OAT (°C)</label><input type="number" id="ldOat" value="15" min="-30" max="45" step="1"></div>
+        <div class="field"><label for="ldQnh">QNH (hPa)</label><input type="number" id="ldQnh" value="1013" min="960" max="1040" step="1"></div>
+      </div>
+    </div>
+
+    <div class="panel fuel-only">
+      <h2>Fuel Planning</h2>
+      <div class="field"><label for="fuelRoute">Route</label>
+        <select id="fuelRoute">
+          <option value="r1">Route 1 · via Kutaisi (612 km)</option>
+          <option value="r2">Route 2 · via Ambrolauri (537 km)</option>
+          <option value="r3">Route 3 · Direct, high terrain (227 km)</option>
+          <option value="custom">Custom route (current sequence)</option>
+          <option value="local">Local flight (same field)</option>
+        </select>
+      </div>
+      <div class="field"><label for="fuelReserve">Reserve</label>
+        <select id="fuelReserve">
+          <option value="45" selected>45 min (VFR day-reserve guideline)</option>
+          <option value="30">30 min (marginal threshold)</option>
+          <option value="60">60 min</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="field" id="fuelReserveCustomWrap" style="display:none;"><label for="fuelReserveCustom">Reserve (min)</label><input type="number" id="fuelReserveCustom" value="45" min="0" max="240" step="5"></div>
+      <div class="field"><label for="fuelScenario">Power setting</label>
+        <select id="fuelScenario">
+          <option value="econ">Economy — 150 km/h, 10.5 L/h (book)</option>
+          <option value="norm" selected>Normal — 175 km/h, 13.0 L/h (book)</option>
+          <option value="cons">Conservative real-world — 165 km/h, ~19.5 L/h</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="fuelTas">TAS (km/h)</label><input type="number" id="fuelTas" value="175" min="60" max="220" step="1" disabled></div>
+        <div class="field"><label for="fuelBurn">Burn (L/h)</label><input type="number" id="fuelBurn" value="13.0" min="5" max="30" step="0.1" disabled></div>
+      </div>
+      <p class="hint">Uses the leg winds and route-wide OAT/QNH currently entered on that route's own tab (Route 1 / Route 2) — switch tabs to adjust per-leg wind or conditions; this page doesn't duplicate that input.</p>
+    </div>
+
+    <div class="panel fpl-only">
+      <h2>Aircraft &amp; Equipment Profile <span class="badge">saved, reused every flight</span></h2>
+      <div class="row2">
+        <div class="field"><label for="fplType">Type designator</label><input type="text" id="fplType" value="ZZZZ" maxlength="10"></div>
+        <div class="field"><label for="fplWake">Wake category</label>
+          <select id="fplWake">
+            <option value="L" selected>L — Light</option>
+            <option value="M">M — Medium</option>
+            <option value="H">H — Heavy</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="fplEquip">COM/NAV equipment</label><input type="text" id="fplEquip" value="VY" maxlength="20"></div>
+        <div class="field"><label for="fplSurv">Surveillance (SSR)</label><input type="text" id="fplSurv" value="S" maxlength="10"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="fplCallsign">Callsign (Item 7, ICAO field form)</label><input type="text" id="fplCallsign" value="4L07007" maxlength="10" placeholder="e.g. 4L07007"></div>
+        <div class="field"><label for="fplReg">Registration</label><input type="text" id="fplReg" value="03-AKA" maxlength="10" placeholder="e.g. 03-AKA"></div>
+      </div>
+      <div class="field"><label for="fplColour">Aircraft colour &amp; markings</label><input type="text" id="fplColour" value="Blue fuselage, wings and tail; orange stylised fox-head emblem on both sides of the fuselage and on the tail fin; white AEROPRAKT titles on fuselage; orange/blue/white striped band on the tail; registration 03-AKA painted on rear fuselage" placeholder="e.g. white/blue, registration on tail"></div>
+      <div class="row2">
+        <div class="field"><label for="fplJackets">Life jackets</label>
+          <select id="fplJackets">
+            <option value="None" selected>None carried</option>
+            <option value="L">L — light fluorescein</option>
+            <option value="F">F — fluorescein</option>
+            <option value="U">U — UHF equipped</option>
+            <option value="V">V — VHF equipped</option>
+          </select>
+        </div>
+        <div class="field"><label for="fplDinghies">Dinghies</label><input type="text" id="fplDinghies" value="0" placeholder="number/capacity/colour"></div>
+      </div>
+      <div class="field"><label for="fplEmergRadio">Emergency radio / ELT</label>
+        <select id="fplEmergRadio">
+          <option value="E" selected>E — ELT carried</option>
+          <option value="U">U — UHF 243.0</option>
+          <option value="V">V — VHF 121.5</option>
+          <option value="None">None carried</option>
+        </select>
+      </div>
+      <p class="hint">Equipment codes confirmed against 03-AKA's actual installed avionics (GCAA aircraft-station-license application, Annexes 8 &amp; 9, filed 26 Mar 2026): VHF — TRIG TY91 + TRIG GTR225 (8.33 kHz channel spacing) → code V+Y; Transponder — TRIG TT21, Mode S with altitude and aircraft-identification reporting, no extended squitter/ADS-B Out, 24-bit address 5140E5 → code S. No VOR or ILS receiver is fitted, hence no O/L codes. GPS onboard is a <strong>portable</strong> unit, not installed/certified aircraft equipment — per ICAO convention the "G" (GNSS) code is reserved for a permanently installed, certified GNSS receiver integrated with the aircraft, so it is correctly omitted from Item 10a; carrying a portable GPS does not change the filed equipment code. ELT — ARTEX ELT-345 (survival equipment, reflected in Item 19 below, not Item 10). Survival-gear details (jackets/dinghies) remain placeholders — verify against the aircraft itself. Saved on this device with your other inputs.</p>
+    </div>
+
+    <div class="panel fpl-only">
+      <h2>Flight Details</h2>
+      <div class="field"><label for="fplRoute">Route</label>
+        <select id="fplRoute">
+          <option value="r1">Route 1 · via Kutaisi</option>
+          <option value="r2">Route 2 · via Ambrolauri</option>
+          <option value="r3">Route 3 · Direct, high terrain</option>
+          <option value="custom">Custom route (filed exactly as built)</option>
+          <option value="local">Local flight (departure = destination)</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="fplPic">Pilot-in-command</label><input type="text" id="fplPic" value=""></div>
+        <div class="field"><label for="fplPob">Persons on board</label><input type="number" id="fplPob" value="2" min="1" max="4"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="fplDof">Date of flight (UTC)</label><input type="text" id="fplDof" value="" placeholder="DDMMYY"></div>
+        <div class="field"><label for="fplEobt">EOBT (UTC)</label><input type="text" id="fplEobt" value="" placeholder="HHMM"></div>
+      </div>
+      <div class="field"><label for="fplLevel">Cruising level</label><input type="text" id="fplLevel" value="VFR" placeholder="e.g. VFR / 4500 ft"></div>
+      <div class="field"><label for="fplAlternate">Alternate aerodrome</label><select id="fplAlternate"></select></div>
+      <div class="field"><label for="fplRemarks">Other information / remarks</label><input type="text" id="fplRemarks" value="" placeholder="e.g. private VFR training flight"></div>
+      <p class="hint">Speed, burn, endurance and total EET below use the Fuel Planning tab's current power setting and this route's leg winds/conditions — switch tabs to adjust those; this page doesn't duplicate that input.</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel route-only">
+      <h2>Weight &amp; Balance</h2>
+      <div class="stat-row">
+        <div class="stat"><div class="k">Total weight</div><div class="v" id="wbTotal">—</div></div>
+        <div class="stat"><div class="k">Margin to MTOW</div><div class="v" id="wbMargin">—</div></div>
+        <div class="stat"><div class="k">Status</div><div class="v"><span class="pill" id="wbPill">—</span></div></div>
+      </div>
+    </div>
+
+    <div class="panel route-only">
+      <h2 id="legsHeading">Legs — Route 1</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Leg</th><th>Wind</th><th>TC</th><th>WCA</th><th>Hdg</th><th>GS</th><th>Dist.</th><th>Time</th><th>Fuel</th></tr></thead>
+          <tbody id="legsBody"></tbody>
+          <tfoot id="legsTotal"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel route-only">
+      <h2>Fuel Status</h2>
+      <div class="stat-row">
+        <div class="stat"><div class="k">Fuel used</div><div class="v" id="fuelUsed">—</div></div>
+        <div class="stat"><div class="k">Fuel remaining</div><div class="v" id="fuelRemain">—</div></div>
+        <div class="stat"><div class="k">Reserve time</div><div class="v" id="reserveTime">—</div></div>
+        <div class="stat"><div class="k">Status</div><div class="v"><span class="pill" id="fuelPill">—</span></div></div>
+      </div>
+      <p class="caveat">Threshold: 45 min = typical VFR day-reserve guideline, 30–45 min = marginal, &lt;30 min = not flyable. Georgia's AIP (ENR 1.10) states no VFR reserve minimum of its own — this guideline is not a regulatory figure.</p>
+    </div>
+
+    <div class="panel route-only">
+      <h2>Aerodrome Performance — Per Movement</h2>
+      <div class="ap-grid" id="apGrid"></div>
+      <p class="caveat">Each departure and arrival is calculated with its own leg's wind. Takeoff/landing distance and climb rate use the reference-POH sea-level figures corrected by a standard +10%/1,000 ft density-altitude rule of thumb (−10%/1,000 ft for climb rate) — an approximation, not the actual airframe-379 altitude chart. Runway choice picks whichever fixed direction gives the lower crosswind component for that movement's wind, except Saguramo and Mestia, which are fixed one-way fields regardless of wind (Saguramo: land RWY09 upslope, depart RWY27 downslope; Mestia: land RWY02 upslope, depart RWY20 downslope). Both are gravity-favorable by design — this tool shows the slope but takes no distance credit for it, so real usable margin may be better than shown. Saguramo's runway dimensions and elevation are provisional/unsurveyed pending GCAA certification — treat with extra caution. Runway lengths and ATS frequencies below are fixed AIP or operator reference data — only the selected direction and the DA-corrected numbers respond to your inputs.</p>
+    </div>
+
+    <div class="panel route-only">
+      <h2>Alternate Field Performance</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>From Saguramo</th><th>Runway</th><th>DA</th><th>TO dist / TORA</th><th>LDG dist / LDA</th><th>Climb</th><th>Xwind</th><th>Status</th></tr></thead>
+          <tbody id="altBody"></tbody>
+        </table>
+      </div>
+      <p class="caveat">All six candidates evaluated under the single wind/OAT/QNH set entered on the left, using the same DA-corrected reference-POH method as the route performance cards. Status flags whichever check (takeoff distance, landing distance, or crosswind) is worst for that field; "tight" means under 15% distance margin or under 5 km/h crosswind margin. ATS: Telavi TWR 120.00 (PPR + flight plan required) · Natakhtari Traffic 131.750 self-announce (no ATS unit; separate operator) · Kutaisi TWR 125.500 / APP 127.100 (Class C CTR) · Ambrolauri AFIS 119.850 · Batumi TWR 118.600 / APP 124.425 (Class C CTR, H24, international — confirm PPR/slot) · Tbilisi TWR 119.000 / APP 134.600 (Class C, H24, international hub — confirm PPR/slot).</p>
+    </div>
+
+    <div class="panel perf-only">
+      <h2>Performance Evaluation</h2>
+      <div class="ap-grid" id="perfGrid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));"></div>
+      <p class="caveat">Same method as the route tabs: reference-POH sea-level figures corrected by a standard +10%/1,000 ft density-altitude rule of thumb (−10%/1,000 ft for climb) — an approximation, not the actual airframe-379 altitude chart. Fixed one-way fields (Saguramo, Mestia) show their runway slope but take no distance credit for it, even though both are gravity-favorable by design. Saguramo's figures are provisional/unsurveyed pending GCAA certification. Runway lengths and ATS frequencies are fixed AIP or operator reference data; only the selected direction and the DA-corrected numbers respond to your inputs.</p>
+    </div>
+
+    <div class="panel fuel-only">
+      <h2>Fuel Requirement — <span id="fuelRouteLabel">Route 1</span></h2>
+      <div class="stat-row">
+        <div class="stat"><div class="k">Trip time</div><div class="v" id="fpTripTime">—</div></div>
+        <div class="stat"><div class="k">Trip fuel</div><div class="v" id="fpTripFuel">—</div></div>
+        <div class="stat"><div class="k">Reserve fuel</div><div class="v" id="fpReserveFuel">—</div></div>
+        <div class="stat"><div class="k">Minimum fuel required</div><div class="v" id="fpMinFuel">—</div></div>
+      </div>
+      <p class="caveat" id="fpBasis">—</p>
+    </div>
+
+    <div class="panel fuel-only">
+      <h2>Margin Against Tanks</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tank</th><th>Capacity</th><th>Margin over minimum</th><th>Endurance</th><th>Status</th></tr></thead>
+          <tbody id="fpTankBody"></tbody>
+        </table>
+      </div>
+      <p class="caveat">Endurance is total usable fuel ÷ burn rate, at this page's power setting — not the same as range with reserve; use the minimum-fuel figure above for dispatch planning. Fuel weight assumed 0.72 kg/L. This is trip fuel plus reserve only — no contingency or alternate/diversion fuel is added here.</p>
+    </div>
+
+    <div class="panel fpl-only">
+      <h2>ICAO Flight Plan — <span id="fplRouteLabel">Route 1</span> <span class="badge" id="fplCopyBadge" style="cursor:pointer;">copy text</span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Field</th><th>Value</th></tr></thead>
+          <tbody id="fplBody"></tbody>
+        </table>
+      </div>
+      <p class="caveat">Formatted as the standard ICAO flight plan Items 7–19, for manual filing by phone/radio/email to Sakaeronavigatsia ATFM — this is a readable form, not a validated AFTN telegraphic message. Item 9's type designator, Item 10's equipment/surveillance codes, and Item 19's survival-equipment codes are placeholders and have not been confirmed against this airframe's actual fit; many light sport types have no assigned ICAO type designator at all, in which case ZZZZ plus the type spelled out in Item 18 remarks is the standard fallback. Verify every field against current requirements before filing — this tool does not submit anything on its own.</p>
+      <p class="hint">Route 1/2/3: outbound leg only (departure → destination) — file the return separately. Custom route: filed exactly as built, first waypoint to last — for a round trip, build and file the outbound and return as two separate custom sequences rather than one mirrored one. Total EET and endurance use this route's current leg winds/conditions and the Fuel Planning tab's power setting.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong><a href="https://docs.google.com/document/d/1YcorYIedx5jqWl8FXmtlXKsG-fG_gaoVlCI3zKy6zq0/edit" target="_blank" rel="noopener">User Guide</a></strong> — every tab and function explained, kept in step with this tool's version. <br>
+  Data consistent with the full written briefings: <a href="https://docs.google.com/document/d/1uw5mk7ZMCgHw1jmtQUyBzpaNxgCK6JCL9p1clx8Pmj8/edit">Route 1 briefing</a> and <a href="https://docs.google.com/document/d/19ELki1xzSYhZaGz8B35vfcleTS-A2kyJH9bVpzJxW9Y/edit">Route 2 briefing</a> — those Google Docs still show the pre-correction figures (Saguramo/Natakhtari conflated as one field); this tool has the corrected data. Kutaisi, Ambrolauri, Telavi (UGGT), Natakhtari and Batumi (UGSB) data sourced from AIP Georgia AD 2, AIRAC effective 09 Jul 2026; Saguramo data from the operator's AFOM draft (unsurveyed, pre-certification) and confirmed operational parameters. Natakhtari and Batumi distance/bearing from Saguramo are great-circle figures computed from each field's published ARP, not AIP-declared route legs. Planning tool only, generic-exercise figures throughout — not a substitute for the current AIP, NOTAMs, actual METAR/TAF, or the airframe's own POH before an actual flight. Route 3's waypoints (Sakadagiano, Agara, BT/ALI) and leg geometry come from an AirNavigation-generated navigation log (uploaded 24 Sep 2026); course/distance were converted from that log's NM/magnetic-course figures into this tool's km/course convention, and all time/fuel/climb numbers were recomputed using this project's own aircraft performance model rather than the log's generic placeholder figures (110 kt IAS, 41.7 L/h). Route 3 crosses notably higher terrain than Routes 1–2 — the source log calls for a transit altitude up to 11,200 ft between BT/ALI and Ambrolauri, well above this tool's simplified per-leg climb model (which uses 7,100 ft at BT/ALI and cannot represent a climb-then-descend "hump" within one leg). At this airframe's modest climb rate, reaching 11,200 ft in the distance available is marginal at best — verify actual climb performance and current MSA/terrain charts before relying on this routing; do not treat the tool's Route 3 numbers as a certified terrain-clearance profile. Your last-used inputs are remembered on this device only.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var AIRPORTS = {
+    UGAK: {name:"Saguramo (private airstrip — pre-certification)", elevFt:1909, fixed:true, draft:true,
+      lat:41.900556, lon:44.763333,
+      landRwy:{hdg:90,LDA:600}, depRwy:{hdg:270,TORA:600},
+      slopePercent:3.1, slopeDeg:1.8, slopeFavorable:true,
+      slopeLabel:"1.8° — land RWY09 upslope, depart RWY27 downslope (gravity-favorable one-way pattern, per operator data)",
+      freqLabel:"Private, uncertified — GCAA certification in process, not yet AIP-listed; no published ATS frequency; coordinate via Sakaeronavigatsia ATFM / NOTAM; traffic coordination required with Natakhtari (~4 km NW)",
+      note:"Runway 600×35 m natural grass/soil (AFOM working RWY 09/27 designation) — unsurveyed: no declared TORA/TODA/ASDA/LDA, no PCN, no confirmed magnetic heading. Elevation is the AFOM reference point (582 m), not a surveyed ARP. All figures here are provisional pending GCAA certification and geodetic survey — treat with extra margin, do not use for actual dispatch."},
+    UGSA: {name:"Natakhtari", elevFt:1687, fixed:false,
+      lat:41.920556, lon:44.719444,
+      runways:[{hdg:100,TORA:948,LDA:948},{hdg:280,TORA:948,LDA:948}],
+      freqLabel:"Natakhtari Traffic 131.750 MHz — self-announce, no ATS unit (Class G ATZ, 2 NM radius, GND–1,000 ft AGL)",
+      note:"Separate, real AIP-registered aerodrome ~4 km NW of Saguramo, under a different operator — usable as a normal takeoff/landing/relocation field for this aircraft (coordinate apron/taxi with the operator and file/close with Sakaeronavigatsia ATFM as for any other field). ARP 41°55'14\"N 044°43'10\"E, RWY 10/28, 948×18 m concrete.",
+      alt:true, distFromUGSA:4, brgFromUGSA:302},
+    UGKO: {name:"Kutaisi", elevFt:160, fixed:false,
+      lat:42.176944, lon:42.482778,
+      runways:[{hdg:70,TORA:2500,LDA:2500},{hdg:250,TORA:2500,LDA:2500}],
+      freqLabel:"Kutaisi TWR 125.500 / APP 127.100 — Class C CTR, GND–1,500 ft, 6 NM radius",
+      alt:true, distFromUGSA:191, brgFromUGSA:280},
+    UGMS: {name:"Mestia", elevFt:4778, fixed:true,
+      lat:43.055000, lon:42.750278,
+      landRwy:{hdg:20,LDA:1150}, depRwy:{hdg:200,TORA:1150},
+      slopePercent:2.0, slopeFavorable:true,
+      slopeLabel:"2.0% — land RWY02 upslope, depart RWY20 downslope (AIP-published, gravity-favorable one-way pattern)",
+      freqLabel:"Mestia AFIS 121.100 — “Mestia Information,” 0400–1440 UTC (0800–1840 local)",
+      note:"Deep in the Svaneti mountain valleys — real VFR access is via mountain passes/valleys, not a straight line. Any custom-route leg computed to/from Mestia by great-circle distance will understate actual routing distance substantially (Route 3's own BT/ALI corridor is ~66.7 km valley-following vs. ~52 km straight-line for the Ambrolauri–Mestia leg alone) — do not trust a custom-route Mestia leg's distance/time/fuel without checking it against a real charted route first."},
+    UGAM: {name:"Ambrolauri", elevFt:1784, fixed:false,
+      lat:42.526944, lon:43.135556,
+      runways:[{hdg:110,TORA:1100,LDA:1100},{hdg:290,TORA:1100,LDA:1100}],
+      freqLabel:"Ambrolauri AFIS 119.850 — “Ambrolauri Information,” 0400–1440 UTC (0800–1840 local)",
+      alt:true, distFromUGSA:151, brgFromUGSA:298},
+    UGGT: {name:"Telavi", elevFt:1496, fixed:false,
+      lat:41.953333, lon:45.508889,
+      runways:[{hdg:102,TORA:1150,LDA:1150},{hdg:282,TORA:1150,LDA:1150}],
+      freqLabel:"Telavi TWR 120.00 — PPR + flight plan + two-way radio required, MON–FRI 0500–1400 (hours as published; confirm UTC/local via NOTAM)",
+      alt:true, distFromUGSA:62, brgFromUGSA:84},
+    UGSB: {name:"Batumi International", elevFt:37, fixed:false,
+      lat:41.610280, lon:41.599440,
+      runways:[{hdg:131,TORA:2500,LDA:2500},{hdg:311,TORA:2500,LDA:2500}],
+      freqLabel:"Batumi TWR 118.600 / APP 124.425 — Class C CTR, H24; ATIS 129.500. Major international/scheduled-traffic airport — confirm PPR, slot and customs/immigration requirements (if crossing a FIR/border routing) for light VFR traffic before filing.",
+      note:"AD 2 data: ARP 41°36'37\"N 041°35'58\"E, RWY 12/30, 2,500×45 m concrete/asphalt, PCN 520/F/B/X/U.",
+      alt:true, distFromUGSA:264, brgFromUGSA:264},
+    UGTB: {name:"Tbilisi International", elevFt:1578, fixed:false,
+      lat:41.669167, lon:44.954722,
+      runways:[{hdg:131,TORA:3000,LDA:3000},{hdg:311,TORA:3000,LDA:3000}],
+      freqLabel:"Tbilisi TWR 119.000 (sec. 128.000) / APP 134.600 — Class C, H24; ATIS 132.800; Tbilisi Information 124.150. Major international/scheduled-traffic hub — confirm PPR, slot and light-GA access procedure before filing; RWY 13L/31R closed, only 13R/31L (3,000×45 m concrete/asphalt) active.",
+      alt:true, distFromUGSA:30, brgFromUGSA:148},
+    WP002: {name:"Sakadagiano (en-route waypoint, not a landing field)", elevFt:4300, enroute:true},
+    WP003: {name:"Agara (en-route waypoint, not a landing field)", elevFt:4300, enroute:true},
+    BTALI: {name:"BT / ALI (en-route waypoint, not a landing field)", elevFt:7100, enroute:true}
+  };
+
+  var ALT_FIELDS = ["UGGT","UGSA","UGKO","UGAM","UGSB","UGTB"]; // extensible: add more codes here once researched and added to AIRPORTS
+
+  var ROUTES = {
+    r1: {label:"Route 1", legs:[
+      {from:"UGAK", to:"UGKO", tc:280, dist:191},
+      {from:"UGKO", to:"UGMS", tc:13,  dist:115},
+      {from:"UGMS", to:"UGKO", tc:193, dist:115},
+      {from:"UGKO", to:"UGAK", tc:99,  dist:191}
+    ]},
+    r2: {label:"Route 2", legs:[
+      {from:"UGAK", to:"UGAM", tc:298, dist:151},
+      {from:"UGAM", to:"UGMS", tc:332, dist:80},
+      {from:"UGMS", to:"UGKO", tc:193, dist:115},
+      {from:"UGKO", to:"UGAK", tc:99,  dist:191}
+    ]},
+    r3: {label:"Route 3", legs:[
+      {from:"UGAK",  to:"WP002", tc:250, dist:16.3},
+      {from:"WP002", to:"WP003", tc:277, dist:64.1},
+      {from:"WP003", to:"BTALI", tc:292, dist:15.4},
+      {from:"BTALI", to:"UGAM",  tc:312, dist:64.5},
+      {from:"UGAM",  to:"UGMS",  tc:325, dist:66.7},
+      {from:"UGMS",  to:"UGAM",  tc:145, dist:66.7},
+      {from:"UGAM",  to:"BTALI", tc:132, dist:64.5},
+      {from:"BTALI", to:"WP003", tc:112, dist:15.4},
+      {from:"WP003", to:"WP002", tc:97,  dist:64.1},
+      {from:"WP002", to:"UGAK",  tc:70,  dist:16.3}
+    ]},
+    custom: {label:"Custom", legs:[]},
+    local: {label:"Local", legs:[]}
+  };
+
+  // Per-aircraft profiles. Each entry holds everything that used to be hardcoded
+  // for the A-32: performance (POH), cruise-power scenarios, empty/max weights,
+  // tank capacities, and the ICAO-plan Aircraft & Equipment defaults (Items 7/9/10/19
+  // plus a callsign for Item 7). Selecting an aircraft on the always-visible Aircraft
+  // panel swaps these in everywhere; editing the panel's fields mutates the selected
+  // aircraft's own profile in place (persisted with the rest of the tool's state).
+  var AIRCRAFT = {
+    a32: {
+      label: "Aeroprakt A-32",
+      emptyKg: 348.8,
+      mtowKg: 600,
+      poh: {
+        toRollM:120, to15mM:319, ldRollM:158, ld15mM:404,
+        vyKmh:120, climbFpmSL:826.8,
+        maxCrosswindKmh:25.2 // 14 kt / 7 m/s demonstrated
+      },
+      scenarios: {
+        econ:{tas:150, burn:10.5},
+        norm:{tas:175, burn:13.0},
+        cons:{tas:165, burn:19.5}
+      },
+      tanks: [88, 112],
+      fpl: {
+        type:"ZZZZ", wake:"L", equip:"VY", surv:"S", reg:"03-AKA",
+        colour:"Blue fuselage, wings and tail; orange stylised fox-head emblem on both sides of the fuselage and on the tail fin; white AEROPRAKT titles on fuselage; orange/blue/white striped band on the tail; registration 03-AKA painted on rear fuselage",
+        jackets:"None", dinghies:"0", emergRadio:"E", callsign:"4L07007"
+      },
+      note: "Reference POH, S/N 129/350 — not confirmed identical to S/N 379."
+    }
+  };
+
+  // Mutable globals reassigned by applyAircraft() whenever the aircraft selection
+  // changes. Every calculation function below already reads POH.xxx / SCENARIOS.xxx
+  // at call time rather than capturing them at definition time, so reassignment
+  // (or in-place mutation, for edits made on the Aircraft panel) is all that's
+  // needed to make the whole tool follow the selected aircraft.
+  var POH, SCENARIOS, EMPTY_KG, MTOW_KG, TANKS;
+
+  var DEFAULT_LEGWIND = {dir:270, spd:15};
+
+  function copyW(){ return {dir:DEFAULT_LEGWIND.dir, spd:DEFAULT_LEGWIND.spd}; }
+
+  var state = {
+    route:"r1",
+    tab:"r1",
+    aircraft:"a32",
+    legWinds:{},
+    customSeq:["UGAK","UGKO"]
+  };
+  Object.keys(ROUTES).forEach(function(rk){
+    state.legWinds[rk] = ROUTES[rk].legs.map(function(){ return copyW(); });
+  });
+
+  var $ = function(id){ return document.getElementById(id); };
+  function toRad(d){ return d*Math.PI/180; }
+  function toDeg(r){ return r*180/Math.PI; }
+  function norm360(d){ return ((d%360)+360)%360; }
+
+  // Great-circle distance (km) and initial true course (deg) between two AIRPORTS
+  // codes' published ARP coordinates. This is a STRAIGHT-LINE figure — it does not
+  // know about terrain, valleys, or passes, so it understates real VFR routing
+  // distance wherever the direct line would cross high ground (Mestia legs especially —
+  // see UGMS's note field). Fine for lowland-to-lowland legs, not a substitute for a
+  // charted route through mountains.
+  function greatCircle(lat1, lon1, lat2, lon2){
+    var R = 6371;
+    var phi1 = toRad(lat1), phi2 = toRad(lat2);
+    var dphi = toRad(lat2-lat1), dlambda = toRad(lon2-lon1);
+    var a = Math.sin(dphi/2)*Math.sin(dphi/2) + Math.cos(phi1)*Math.cos(phi2)*Math.sin(dlambda/2)*Math.sin(dlambda/2);
+    var c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var dist = R*c;
+    var y = Math.sin(dlambda)*Math.cos(phi2);
+    var x = Math.cos(phi1)*Math.sin(phi2) - Math.sin(phi1)*Math.cos(phi2)*Math.cos(dlambda);
+    var tc = norm360(toDeg(Math.atan2(y, x)));
+    return {dist:dist, tc:tc};
+  }
+  function legGeometry(fromCode, toCode){
+    var a = AIRPORTS[fromCode], b = AIRPORTS[toCode];
+    if(!a || !b || a.lat===undefined || b.lat===undefined) return {dist:0, tc:0};
+    return greatCircle(a.lat, a.lon, b.lat, b.lon);
+  }
+
+  // Rebuilds ROUTES.custom's legs from state.customSeq (the ordered waypoint list the
+  // user is building), computing each leg's course/distance fresh from coordinates.
+  // Preserves already-entered leg winds where the leg count hasn't changed; otherwise
+  // resets to the default wind so array lengths always stay in sync.
+  function rebuildCustomRoute(){
+    var legs = [];
+    for(var i=0;i<state.customSeq.length-1;i++){
+      var from = state.customSeq[i], to = state.customSeq[i+1];
+      var g = legGeometry(from, to);
+      legs.push({from:from, to:to, tc:Math.round(g.tc), dist:Math.round(g.dist*10)/10});
+    }
+    ROUTES.custom.legs = legs;
+    var oldWinds = state.legWinds.custom || [];
+    state.legWinds.custom = legs.map(function(_, i){ return oldWinds[i] ? oldWinds[i] : copyW(); });
+  }
+
+  // Rebuilds ROUTES.local's single "leg" from the Local Flight Setup fields —
+  // same aerodrome for departure and destination, zero distance, with a
+  // duration entered directly (minutes) instead of computed from geometry.
+  // computeLegsFuel()/render() special-case leg.isLocal to use that duration
+  // for time/fuel rather than the usual distance/groundspeed math.
+  function rebuildLocalRoute(){
+    var code = $("localField").value || "UGAK";
+    var minutes = +$("localMinutes").value || 0;
+    ROUTES.local.legs = [{from:code, to:code, tc:0, dist:0, isLocal:true, minutes:minutes}];
+    var oldWinds = state.legWinds.local || [];
+    state.legWinds.local = [ oldWinds[0] ? oldWinds[0] : copyW() ];
+  }
+
+  // ---- Aircraft profile plumbing ----
+
+  function populateAircraftSelect(){
+    var opts = Object.keys(AIRCRAFT).map(function(k){
+      return "<option value='"+k+"'>"+AIRCRAFT[k].label+"</option>";
+    }).join("");
+    $("aircraftSelect").innerHTML = opts;
+    $("aircraftSelect").value = state.aircraft;
+  }
+
+  // Points POH/SCENARIOS/EMPTY_KG/MTOW_KG/TANKS at the selected aircraft's profile,
+  // refreshes the Aircraft panel's own editable fields and the scenario/tank option
+  // labels so they show that aircraft's numbers, and (unless told to skip) resets the
+  // Aircraft & Equipment Profile fields on the Flight Plan tab to that aircraft's
+  // filed defaults.
+  function applyAircraft(key, opts){
+    opts = opts || {};
+    var ac = AIRCRAFT[key];
+    if(!ac) return;
+    state.aircraft = key;
+    POH = ac.poh;
+    SCENARIOS = ac.scenarios;
+    EMPTY_KG = ac.emptyKg;
+    MTOW_KG = ac.mtowKg;
+    TANKS = ac.tanks.slice();
+    populateAircraftFields();
+    populateScenarioOptions();
+    populateTankOptions();
+    if($("acSublineName")) $("acSublineName").textContent = ac.label;
+    if(!opts.skipFplDefaults){ applyAircraftFplDefaults(); }
+  }
+
+  function populateAircraftFields(){
+    var ac = AIRCRAFT[state.aircraft];
+    $("acEmptyKg").value = ac.emptyKg;
+    $("acMtowKg").value = ac.mtowKg;
+    $("acVy").value = ac.poh.vyKmh;
+    $("acClimbSL").value = ac.poh.climbFpmSL;
+    $("acToRoll").value = ac.poh.toRollM;
+    $("acTo15m").value = ac.poh.to15mM;
+    $("acLdRoll").value = ac.poh.ldRollM;
+    $("acLd15m").value = ac.poh.ld15mM;
+    $("acMaxXwind").value = ac.poh.maxCrosswindKmh;
+    $("acTank1Cap").value = ac.tanks[0] || 0;
+    $("acTank2Cap").value = ac.tanks[1] || 0;
+    $("acEconTas").value = ac.scenarios.econ.tas;
+    $("acEconBurn").value = ac.scenarios.econ.burn;
+    $("acNormTas").value = ac.scenarios.norm.tas;
+    $("acNormBurn").value = ac.scenarios.norm.burn;
+    $("acConsTas").value = ac.scenarios.cons.tas;
+    $("acConsBurn").value = ac.scenarios.cons.burn;
+    $("acHint").textContent = "Editing these numbers updates "+ac.label+"'s profile immediately across Legs, Performance Check and Fuel Planning."+(ac.note?(" "+ac.note):"");
+  }
+
+  // Reads the Aircraft panel's editable fields back into the selected aircraft's
+  // profile. POH and SCENARIOS are mutated in place (same object references the
+  // globals already point at); EMPTY_KG/MTOW_KG/TANKS are plain values, so they're
+  // reassigned alongside the aircraft record.
+  function updateAircraftFromFields(){
+    var ac = AIRCRAFT[state.aircraft];
+    ac.emptyKg = +$("acEmptyKg").value || ac.emptyKg; EMPTY_KG = ac.emptyKg;
+    ac.mtowKg = +$("acMtowKg").value || ac.mtowKg; MTOW_KG = ac.mtowKg;
+    ac.poh.vyKmh = +$("acVy").value || ac.poh.vyKmh;
+    ac.poh.climbFpmSL = +$("acClimbSL").value || ac.poh.climbFpmSL;
+    ac.poh.toRollM = +$("acToRoll").value || ac.poh.toRollM;
+    ac.poh.to15mM = +$("acTo15m").value || ac.poh.to15mM;
+    ac.poh.ldRollM = +$("acLdRoll").value || ac.poh.ldRollM;
+    ac.poh.ld15mM = +$("acLd15m").value || ac.poh.ld15mM;
+    ac.poh.maxCrosswindKmh = +$("acMaxXwind").value || ac.poh.maxCrosswindKmh;
+    var t1 = +$("acTank1Cap").value || 0, t2 = +$("acTank2Cap").value || 0;
+    ac.tanks = [t1, t2].filter(function(v){ return v>0; });
+    if(!ac.tanks.length) ac.tanks = [t1||1];
+    TANKS = ac.tanks.slice();
+    ac.scenarios.econ.tas = +$("acEconTas").value || ac.scenarios.econ.tas;
+    ac.scenarios.econ.burn = +$("acEconBurn").value || ac.scenarios.econ.burn;
+    ac.scenarios.norm.tas = +$("acNormTas").value || ac.scenarios.norm.tas;
+    ac.scenarios.norm.burn = +$("acNormBurn").value || ac.scenarios.norm.burn;
+    ac.scenarios.cons.tas = +$("acConsTas").value || ac.scenarios.cons.tas;
+    ac.scenarios.cons.burn = +$("acConsBurn").value || ac.scenarios.cons.burn;
+    $("acHint").textContent = "Editing these numbers updates "+ac.label+"'s profile immediately across Legs, Performance Check and Fuel Planning."+(ac.note?(" "+ac.note):"");
+  }
+
+  // Refreshes the Power Setting dropdowns' option TEXT (Economy/Normal/Conservative,
+  // on both the route Cruise panel and Fuel Planning) to show the selected aircraft's
+  // current TAS/burn numbers, without disturbing which option is selected.
+  function populateScenarioOptions(){
+    var labels = {
+      econ: "Economy — "+fmt(SCENARIOS.econ.tas,0)+" km/h, "+fmt(SCENARIOS.econ.burn,1)+" L/h (book)",
+      norm: "Normal — "+fmt(SCENARIOS.norm.tas,0)+" km/h, "+fmt(SCENARIOS.norm.burn,1)+" L/h (book)",
+      cons: "Conservative real-world — "+fmt(SCENARIOS.cons.tas,0)+" km/h, ~"+fmt(SCENARIOS.cons.burn,1)+" L/h"
+    };
+    ["scenario","fuelScenario"].forEach(function(selId){
+      var sel = $(selId);
+      Array.prototype.forEach.call(sel.options, function(opt){
+        if(labels[opt.value]) opt.textContent = labels[opt.value];
+      });
+    });
+  }
+
+  // Rebuilds the Fuel tanks dropdown from the selected aircraft's TANKS array —
+  // option values must stay literally equal to the numeric capacity, since
+  // readInputs() parses a non-"custom" tank value directly as fuel liters.
+  function populateTankOptions(){
+    var tank = $("tank");
+    var current = tank.value;
+    var opts = TANKS.map(function(cap, i){
+      return "<option value='"+cap+"'>"+(i===0?"Tank 1":"Tank "+(i+1))+" — "+cap+" L usable</option>";
+    }).join("") + "<option value='custom'>Custom</option>";
+    tank.innerHTML = opts;
+    var stillValid = Array.prototype.some.call(tank.options, function(o){ return o.value===current; });
+    tank.value = stillValid ? current : String(TANKS[0]);
+    updateTankWrap();
+  }
+
+  // Resets the Flight Plan tab's Aircraft & Equipment Profile fields (Items 7/9/10/19
+  // plus the Item-7 callsign) to the selected aircraft's filed defaults. Called when
+  // the aircraft selector changes; loadState() lets any saved user edits to those
+  // fields override these defaults afterward, same precedence as every other saved input.
+  function applyAircraftFplDefaults(){
+    var f = AIRCRAFT[state.aircraft].fpl;
+    $("fplType").value = f.type;
+    $("fplWake").value = f.wake;
+    $("fplEquip").value = f.equip;
+    $("fplSurv").value = f.surv;
+    $("fplReg").value = f.reg;
+    $("fplColour").value = f.colour;
+    $("fplJackets").value = f.jackets;
+    $("fplDinghies").value = f.dinghies;
+    $("fplEmergRadio").value = f.emergRadio;
+    $("fplCallsign").value = f.callsign;
+  }
+
+  function windTriangle(tc, tas, windDir, windSpd){
+    var A = windDir - tc;
+    var ratio = (windSpd/tas) * Math.sin(toRad(A));
+    ratio = Math.max(-1, Math.min(1, ratio));
+    var wcaDeg = toDeg(Math.asin(ratio));
+    var hdg = norm360(tc + wcaDeg);
+    var gs = tas*Math.cos(toRad(wcaDeg)) - windSpd*Math.cos(toRad(A));
+    return {wca:wcaDeg, hdg:hdg, gs:Math.max(gs,1)};
+  }
+
+  function pressureAlt(elevFt, qnh){
+    return elevFt + (1013.25 - qnh)*30;
+  }
+  function densityAlt(elevFt, qnh, oat){
+    var pa = pressureAlt(elevFt, qnh);
+    var isaTemp = 15 - 2*(pa/1000);
+    return pa + 120*(oat - isaTemp);
+  }
+  function daDistanceFactor(daFt){ return 1 + 0.10*(daFt/1000); }
+  function daClimbFpm(daFt){ return Math.max(POH.climbFpmSL * (1 - 0.10*(daFt/1000)), 40); }
+
+  // Generic slope-correction rule of thumb (not validated against any specific POH):
+  // +10% required distance per 1% of adverse grade. Where a fixed field's one-way
+  // pattern is itself slope-favorable (land upslope / depart downslope — true for both
+  // Saguramo and Mestia by design), this tool takes NO distance credit for it and shows
+  // factor 1.0 — conservative on purpose, since the favorable-slope benefit is unproven
+  // for these specific airframes/strips.
+  function slopeDistanceFactor(ap){
+    if(!ap.fixed || !ap.slopePercent) return {factor:1, label:null};
+    var K = 0.10;
+    if(ap.slopeFavorable){
+      return {factor:1, label:fmt(ap.slopePercent,1)+"% "+(ap.slopeDeg?("("+fmt(ap.slopeDeg,1)+"°) "):"")+"favorable — no distance credit taken"};
+    }
+    var f = 1 + K*ap.slopePercent;
+    return {factor:f, label:fmt(ap.slopePercent,1)+"% adverse — +"+fmt((f-1)*100,0)+"% distance"};
+  }
+  function rwyNumLabel(hdg){ return String(Math.round(hdg/10)).padStart(2,"0"); }
+
+  function crosswind(rwyHdg, windDir, windSpd){
+    return Math.abs(windSpd * Math.sin(toRad(windDir - rwyHdg)));
+  }
+  function headwind(rwyHdg, windDir, windSpd){
+    return windSpd * Math.cos(toRad(windDir - rwyHdg));
+  }
+
+  function bestRunway(ap, windDir, windSpd){
+    var best=null, bestX=Infinity;
+    ap.runways.forEach(function(r){
+      var x = crosswind(r.hdg, windDir, windSpd);
+      if(x<bestX){bestX=x; best=r;}
+    });
+    return {rwy:best, crosswind:bestX, headwind:headwind(best.hdg, windDir, windSpd)};
+  }
+
+  function readInputs(){
+    var oat = +$("oat").value;
+    var qnh = +$("qnh").value || 1013;
+    var scen = $("scenario").value;
+    var tas = +$("tas").value;
+    var burn = +$("burn").value;
+    var pilot = +$("pilot").value || 0;
+    var baggage = +$("baggage").value || 0;
+    var paxOn = $("paxOn").checked;
+    var pax = paxOn ? (+$("pax").value || 0) : 0;
+    var tank = $("tank").value;
+    var fuelLiters;
+    if(tank==="custom"){ fuelLiters = +$("fuelLiters").value || 0; }
+    else { fuelLiters = +tank; }
+    var altWindDir = +$("altWindDir").value || 0;
+    var altWindSpd = +$("altWindSpd").value || 0;
+    var altOat = +$("altOat").value;
+    var altQnh = +$("altQnh").value || 1013;
+    return {oat:oat, qnh:qnh, scen:scen, tas:tas, burn:burn,
+      pilot:pilot, baggage:baggage, pax:pax, fuelLiters:fuelLiters,
+      altWindDir:altWindDir, altWindSpd:altWindSpd, altOat:altOat, altQnh:altQnh};
+  }
+
+  // Converts an HTML date input's ISO value (YYYY-MM-DD) to ICAO DOF format (DDMMYY).
+  function isoToDOF(iso){
+    if(!iso || iso.length<10) return "";
+    var y = iso.slice(2,4), mo = iso.slice(5,7), d = iso.slice(8,10);
+    return d+mo+y;
+  }
+  function fmt(n, d){ d = (d===undefined)?0:d; return n.toFixed(d); }
+  function fmtTime(hrs){
+    if(hrs<0) hrs=0;
+    var h = Math.floor(hrs);
+    var m = Math.round((hrs-h)*60);
+    if(m===60){h+=1; m=0;}
+    return h+"h "+String(m).padStart(2,"0")+"m";
+  }
+  function flagColor(ok){ return ok ? "var(--ink)" : "var(--red)"; }
+
+  function buildMovementCard(code, type, w, qnh, oat, contextLabel){
+    var ap = AIRPORTS[code];
+    var da = densityAlt(ap.elevFt, qnh, oat);
+    var factor = daDistanceFactor(da);
+    var climb = daClimbFpm(da);
+
+    var rwyHdg, rwyLabel, declared, distReq, xwind;
+    if(ap.fixed){
+      if(type==="TOF"){ rwyHdg=ap.depRwy.hdg; declared=ap.depRwy.TORA; rwyLabel="RWY "+rwyNumLabel(rwyHdg)+" (fixed departure)"; }
+      else { rwyHdg=ap.landRwy.hdg; declared=ap.landRwy.LDA; rwyLabel="RWY "+rwyNumLabel(rwyHdg)+" (fixed landing)"; }
+      xwind = crosswind(rwyHdg, w.dir, w.spd);
+    } else {
+      var best = bestRunway(ap, w.dir, w.spd);
+      rwyHdg = best.rwy.hdg;
+      declared = type==="TOF" ? best.rwy.TORA : best.rwy.LDA;
+      rwyLabel = "RWY "+String(rwyHdg).padStart(3,"0")+" (best into wind)";
+      xwind = best.crosswind;
+    }
+    var slope = slopeDistanceFactor(ap);
+    distReq = (type==="TOF" ? POH.to15mM : POH.ld15mM) * factor * slope.factor;
+    var ok = distReq <= declared;
+    var xOk = xwind <= POH.maxCrosswindKmh;
+
+    var card = document.createElement("div");
+    card.className = "ap-card "+(type==="TOF"?"tof":"ldg");
+    var verb = type==="TOF" ? "Depart" : "Arrive";
+    var distLabel = type==="TOF" ? "TO dist. (15 m) / TORA" : "LDG dist. (15 m) / LDA";
+    var lines =
+      "<h3>"+verb+" · "+code+"</h3>"+
+      "<div class='ap-sub'>"+ap.name+" · "+ap.elevFt+" ft"+(ap.draft?" (provisional)":"")+(contextLabel?(" · "+contextLabel):"")+"</div>"+
+      "<div class='ap-line'><span class='lbl'>Runway used</span><span class='val'>"+rwyLabel+"</span></div>"+
+      "<div class='ap-line'><span class='lbl'>Density altitude</span><span class='val'>"+fmt(da,0)+" ft</span></div>";
+    if(slope.label){
+      lines += "<div class='ap-line'><span class='lbl'>Runway slope</span><span class='val' style='font-size:11.5px;text-align:right;max-width:60%;'>"+slope.label+"</span></div>";
+    }
+    lines += "<div class='ap-line'><span class='lbl'>"+distLabel+"</span><span class='val' style='color:"+flagColor(ok)+"'>"+fmt(distReq,0)+" / "+declared+" m</span></div>";
+    if(type==="TOF"){
+      lines += "<div class='ap-line'><span class='lbl'>Climb (Vy)</span><span class='val'>"+fmt(climb,0)+" ft/min</span></div>";
+    }
+    lines += "<div class='ap-line'><span class='lbl'>Crosswind</span><span class='val' style='color:"+flagColor(xOk)+"'>"+fmt(xwind,0)+" km/h</span></div>";
+    lines += "<div class='ap-line'><span class='lbl'>ATS</span><span class='val' style='font-size:11px;text-align:right;max-width:60%;'>"+ap.freqLabel+"</span></div>";
+    card.innerHTML = lines;
+    return card;
+  }
+
+  function renderLegWinds(){
+    var route = ROUTES[state.route];
+    var winds = state.legWinds[state.route];
+    var wrap = $("legWindsBody");
+    wrap.innerHTML = "";
+    route.legs.forEach(function(leg, i){
+      var row = document.createElement("div");
+      row.className = "legwind-row";
+      var w = winds[i];
+      row.innerHTML =
+        "<div class='lw-label'>"+ptLabel(leg.from)+" → "+ptLabel(leg.to)+"</div>"+
+        "<input type='number' min='0' max='359' step='10' value='"+w.dir+"' data-leg='"+i+"' data-field='dir'>"+
+        "<input type='number' min='0' max='150' step='1' value='"+w.spd+"' data-leg='"+i+"' data-field='spd'>";
+      wrap.appendChild(row);
+    });
+    wrap.querySelectorAll("input").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var idx = +inp.getAttribute("data-leg");
+        var field = inp.getAttribute("data-field");
+        var v = +inp.value || 0;
+        state.legWinds[state.route][idx][field] = v;
+        render();
+      });
+    });
+  }
+
+  function render(){
+    var inp = readInputs();
+    var route = ROUTES[state.route];
+    var winds = state.legWinds[state.route];
+
+    // ---- Weight & Balance ----
+    var fuelKg = inp.fuelLiters*0.72;
+    var totalKg = EMPTY_KG + inp.pilot + inp.pax + inp.baggage + fuelKg;
+    var margin = MTOW_KG - totalKg;
+    $("wbTotal").textContent = fmt(totalKg,1)+" kg";
+    $("wbMargin").textContent = (margin>=0?"+":"")+fmt(margin,1)+" kg";
+    var acNow = AIRCRAFT[state.aircraft];
+    $("wbNoteHint").textContent = "Empty weight "+fmt(EMPTY_KG,1)+" kg, MTOW "+fmt(MTOW_KG,0)+" kg ("+(acNow&&acNow.note?acNow.note:"reference POH")+")";
+    var wbPill = $("wbPill");
+    if(margin<0){ wbPill.textContent="over mtow"; wbPill.className="pill bad"; }
+    else if(margin<15){ wbPill.textContent="tight"; wbPill.className="pill warn"; }
+    else { wbPill.textContent="ok"; wbPill.className="pill ok"; }
+
+    // ---- Legs ----
+    var body = $("legsBody");
+    body.innerHTML = "";
+    var totalDist=0, totalTimeH=0, totalFuelL=0;
+    var apElev = {};
+    Object.keys(AIRPORTS).forEach(function(k){ apElev[k]=AIRPORTS[k].elevFt; });
+
+    route.legs.forEach(function(leg, i){
+      var w = winds[i];
+      var legTimeH, legFuelL, wt;
+      if(leg.isLocal){
+        legTimeH = (leg.minutes||0)/60;
+        legFuelL = legTimeH * inp.burn;
+        wt = {wca:0, hdg:0, gs:0};
+      } else {
+        var fromElev = apElev[leg.from], toElev = apElev[leg.to];
+        var gainFt = toElev - fromElev;
+        var daAtDep = densityAlt(fromElev, inp.qnh, inp.oat);
+        var climbFpm = daClimbFpm(daAtDep);
+
+        var climbTimeH = 0, climbDistKm = 0;
+        if(gainFt>0){
+          var climbTimeMin = gainFt/climbFpm;
+          climbTimeH = climbTimeMin/60;
+          climbDistKm = (POH.vyKmh/60)*climbTimeMin;
+        }
+        var cruiseDistKm = Math.max(leg.dist - climbDistKm, 0);
+        wt = windTriangle(leg.tc, inp.tas, w.dir, w.spd);
+        var cruiseTimeH = cruiseDistKm / wt.gs;
+        legTimeH = climbTimeH + cruiseTimeH;
+        legFuelL = legTimeH * inp.burn;
+      }
+
+      totalDist += leg.dist;
+      totalTimeH += legTimeH;
+      totalFuelL += legFuelL;
+
+      var tr = document.createElement("tr");
+      if(leg.isLocal){
+        tr.innerHTML =
+          "<td>"+ptLabel(leg.from)+" (local area)</td>"+
+          "<td class='num'>"+String(Math.round(w.dir)).padStart(3,"0")+"°/"+fmt(w.spd,0)+"</td>"+
+          "<td class='num'>—</td>"+
+          "<td class='num'>—</td>"+
+          "<td class='num'>—</td>"+
+          "<td class='num'>—</td>"+
+          "<td class='num'>local</td>"+
+          "<td class='num'>"+fmtTime(legTimeH)+"</td>"+
+          "<td class='num'>"+fmt(legFuelL,1)+" L</td>";
+      } else {
+        tr.innerHTML =
+          "<td>"+ptLabel(leg.from)+" → "+ptLabel(leg.to)+"</td>"+
+          "<td class='num'>"+String(Math.round(w.dir)).padStart(3,"0")+"°/"+fmt(w.spd,0)+"</td>"+
+          "<td class='num'>"+fmt(leg.tc,0)+"°</td>"+
+          "<td class='num'>"+(wt.wca>=0?"+":"")+fmt(wt.wca,0)+"°</td>"+
+          "<td class='num'>"+fmt(wt.hdg,0)+"°</td>"+
+          "<td class='num'>"+fmt(wt.gs,0)+"</td>"+
+          "<td class='num'>"+fmt(leg.dist,0)+" km</td>"+
+          "<td class='num'>"+fmtTime(legTimeH)+"</td>"+
+          "<td class='num'>"+fmt(legFuelL,1)+" L</td>";
+      }
+      body.appendChild(tr);
+    });
+
+    $("legsTotal").innerHTML =
+      "<tr class='total'><td>Total</td><td></td><td></td><td></td><td></td><td></td>"+
+      "<td class='num'>"+fmt(totalDist,0)+" km</td>"+
+      "<td class='num'>"+fmtTime(totalTimeH)+"</td>"+
+      "<td class='num'>"+fmt(totalFuelL,1)+" L</td></tr>";
+
+    // ---- Fuel status ----
+    var remainL = inp.fuelLiters - totalFuelL;
+    var remainH = remainL / inp.burn;
+    $("fuelUsed").textContent = fmt(totalFuelL,1)+" L";
+    $("fuelRemain").textContent = fmt(remainL,1)+" L";
+    $("reserveTime").textContent = fmtTime(Math.max(remainH,0)) + (remainH<0? " (deficit)":"");
+    var fp = $("fuelPill");
+    if(remainH<0.5){ fp.textContent = remainH<0 ? "not flyable" : "marginal"; fp.className="pill "+(remainH<0?"bad":"warn"); }
+    else if(remainH<0.75){ fp.textContent="marginal"; fp.className="pill warn"; }
+    else { fp.textContent="ok"; fp.className="pill ok"; }
+    if(remainL<0){ fp.textContent="not flyable"; fp.className="pill bad"; }
+
+    // ---- Aerodrome performance, per movement ----
+    var grid = $("apGrid");
+    grid.innerHTML = "";
+
+    route.legs.forEach(function(leg, i){
+      var w = winds[i];
+      var ctx = "Leg "+(i+1)+" wind "+String(Math.round(w.dir)).padStart(3,"0")+"°/"+fmt(w.spd,0);
+      var fromAp = AIRPORTS[leg.from], toAp = AIRPORTS[leg.to];
+      if(fromAp && !fromAp.enroute){ grid.appendChild(buildMovementCard(leg.from, "TOF", w, inp.qnh, inp.oat, ctx)); }
+      if(toAp && !toAp.enroute){ grid.appendChild(buildMovementCard(leg.to, "LDG", w, inp.qnh, inp.oat, ctx)); }
+    });
+
+    // ---- Alternate fields (comparison table) ----
+    var altBody = $("altBody");
+    altBody.innerHTML = "";
+    ALT_FIELDS.forEach(function(code){
+      var ap = AIRPORTS[code];
+      if(!ap) return;
+      var da = densityAlt(ap.elevFt, inp.altQnh, inp.altOat);
+      var factor = daDistanceFactor(da);
+      var climb = daClimbFpm(da);
+      var best = bestRunway(ap, inp.altWindDir, inp.altWindSpd);
+      var toReq = POH.to15mM*factor, ldReq = POH.ld15mM*factor;
+      var toOk = toReq <= best.rwy.TORA, ldOk = ldReq <= best.rwy.LDA;
+      var xOk = best.crosswind <= POH.maxCrosswindKmh;
+
+      var status, cls;
+      if(!toOk || !ldOk){ status="insufficient runway"; cls="bad"; }
+      else if(!xOk){ status="crosswind exceeded"; cls="bad"; }
+      else {
+        var toMarginPct = (best.rwy.TORA-toReq)/best.rwy.TORA;
+        var ldMarginPct = (best.rwy.LDA-ldReq)/best.rwy.LDA;
+        var xMarginKmh = POH.maxCrosswindKmh - best.crosswind;
+        if(toMarginPct<0.15 || ldMarginPct<0.15 || xMarginKmh<5){ status="tight"; cls="warn"; }
+        else { status="ok"; cls="ok"; }
+      }
+
+      var fromLabel = ap.distFromUGSA!==undefined ? (ap.distFromUGSA+" km / "+String(ap.brgFromUGSA).padStart(3,"0")+"°T") : "—";
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>"+ap.name+" ("+code+")</td>"+
+        "<td class='num'>"+fromLabel+"</td>"+
+        "<td class='num'>RWY "+String(best.rwy.hdg).padStart(3,"0")+"</td>"+
+        "<td class='num'>"+fmt(da,0)+" ft</td>"+
+        "<td class='num' style='color:"+flagColor(toOk)+"'>"+fmt(toReq,0)+" / "+best.rwy.TORA+" m</td>"+
+        "<td class='num' style='color:"+flagColor(ldOk)+"'>"+fmt(ldReq,0)+" / "+best.rwy.LDA+" m</td>"+
+        "<td class='num'>"+fmt(climb,0)+" ft/min</td>"+
+        "<td class='num' style='color:"+flagColor(xOk)+"'>"+fmt(best.crosswind,0)+" km/h</td>"+
+        "<td><span class='pill "+cls+"'>"+status+"</span></td>";
+      altBody.appendChild(tr);
+    });
+
+    saveState();
+  }
+
+  // Mirrors the per-leg climb+cruise math in render() above, factored out so the
+  // Fuel Planning page can evaluate a route's fuel need under its own power setting
+  // and reserve, independent of which route tab is currently displayed.
+  function computeLegsFuel(legs, winds, tas, burn, oat, qnh){
+    var apElev = {};
+    Object.keys(AIRPORTS).forEach(function(k){ apElev[k]=AIRPORTS[k].elevFt; });
+    var totalDist=0, totalTimeH=0, totalFuelL=0;
+    legs.forEach(function(leg, i){
+      var w = winds[i];
+      var legTimeH;
+      if(leg.isLocal){
+        legTimeH = (leg.minutes||0)/60;
+      } else {
+        var fromElev = apElev[leg.from], toElev = apElev[leg.to];
+        var gainFt = toElev - fromElev;
+        var daAtDep = densityAlt(fromElev, qnh, oat);
+        var climbFpm = daClimbFpm(daAtDep);
+        var climbTimeH = 0, climbDistKm = 0;
+        if(gainFt>0){
+          var climbTimeMin = gainFt/climbFpm;
+          climbTimeH = climbTimeMin/60;
+          climbDistKm = (POH.vyKmh/60)*climbTimeMin;
+        }
+        var cruiseDistKm = Math.max(leg.dist - climbDistKm, 0);
+        var wt = windTriangle(leg.tc, tas, w.dir, w.spd);
+        var cruiseTimeH = cruiseDistKm / wt.gs;
+        legTimeH = climbTimeH + cruiseTimeH;
+      }
+      totalDist += leg.dist;
+      totalTimeH += legTimeH;
+      totalFuelL += legTimeH*burn;
+    });
+    return {totalDist:totalDist, totalTimeH:totalTimeH, totalFuelL:totalFuelL};
+  }
+  function computeRouteFuel(routeKey, tas, burn, oat, qnh){
+    return computeLegsFuel(ROUTES[routeKey].legs, state.legWinds[routeKey], tas, burn, oat, qnh);
+  }
+  function routeLabelShort(k){ if(k==="r1") return "Route 1"; if(k==="r2") return "Route 2"; if(k==="r3") return "Route 3"; if(k==="local") return "Local flight"; return "Custom route"; }
+
+  function renderFuel(){
+    var routeKey = $("fuelRoute").value;
+    var tas = +$("fuelTas").value;
+    var burn = +$("fuelBurn").value;
+    var reserveSel = $("fuelReserve").value;
+    var reserveMin = reserveSel==="custom" ? (+$("fuelReserveCustom").value||0) : (+reserveSel);
+    var oat = +$("oat").value;
+    var qnh = +$("qnh").value || 1013;
+
+    var res = computeRouteFuel(routeKey, tas, burn, oat, qnh);
+    var reserveFuelL = burn * (reserveMin/60);
+    var minFuelL = res.totalFuelL + reserveFuelL;
+
+    $("fuelRouteLabel").textContent = routeFullLabel(routeKey);
+    $("fpTripTime").textContent = fmtTime(res.totalTimeH);
+    $("fpTripFuel").textContent = fmt(res.totalFuelL,1)+" L";
+    $("fpReserveFuel").textContent = fmt(reserveFuelL,1)+" L ("+reserveMin+" min)";
+    $("fpMinFuel").textContent = fmt(minFuelL,1)+" L";
+    $("fpBasis").textContent = "Uses "+routeLabelShort(routeKey)+"'s currently entered leg winds and OAT "+fmt(oat,0)+"°C / QNH "+fmt(qnh,0)+" hPa (set on that route's own tab). "+fmt(res.totalDist,0)+" km total, "+fmtTime(res.totalTimeH)+" trip time at "+tas+" km/h TAS, "+fmt(burn,1)+" L/h burn.";
+
+    var tanks = TANKS.map(function(cap, i){ return {label:(i===0?"Tank 1":"Tank "+(i+1)), cap:cap}; });
+    var body = $("fpTankBody");
+    body.innerHTML = "";
+    tanks.forEach(function(t){
+      var marginL = t.cap - minFuelL;
+      var enduranceH = t.cap / burn;
+      var status, cls;
+      if(marginL<0){ status="insufficient"; cls="bad"; }
+      else if(marginL < burn*0.25){ status="tight"; cls="warn"; }
+      else { status="ok"; cls="ok"; }
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>"+t.label+"</td>"+
+        "<td class='num'>"+t.cap+" L</td>"+
+        "<td class='num' style='color:"+(marginL<0?"var(--red)":"var(--ink)")+"'>"+(marginL>=0?"+":"")+fmt(marginL,1)+" L</td>"+
+        "<td class='num'>"+fmtTime(enduranceH)+"</td>"+
+        "<td><span class='pill "+cls+"'>"+status+"</span></td>";
+      body.appendChild(tr);
+    });
+
+    saveState();
+  }
+
+  function renderPerf(){
+    var toCode = $("toField").value;
+    var ldCode = $("ldField").value;
+    var toW = {dir:+$("toWindDir").value||0, spd:+$("toWindSpd").value||0};
+    var toQnh = +$("toQnh").value||1013, toOat = +$("toOat").value;
+    var ldW = {dir:+$("ldWindDir").value||0, spd:+$("ldWindSpd").value||0};
+    var ldQnh = +$("ldQnh").value||1013, ldOat = +$("ldOat").value;
+
+    var grid = $("perfGrid");
+    grid.innerHTML = "";
+    grid.appendChild(buildMovementCard(toCode, "TOF", toW, toQnh, toOat, "Wind "+String(Math.round(toW.dir)).padStart(3,"0")+"°/"+fmt(toW.spd,0)));
+    grid.appendChild(buildMovementCard(ldCode, "LDG", ldW, ldQnh, ldOat, "Wind "+String(Math.round(ldW.dir)).padStart(3,"0")+"°/"+fmt(ldW.spd,0)));
+
+    saveState();
+  }
+
+  function ptLabel(code){ return code==="BTALI" ? "BT/ALI" : code; }
+  function routeFullLabel(k){
+    if(k==="r1") return "Route 1 (via Kutaisi)";
+    if(k==="r2") return "Route 2 (via Ambrolauri)";
+    if(k==="r3") return "Route 3 (direct, high terrain)";
+    if(k==="local"){
+      var leg = ROUTES.local.legs[0];
+      var code = leg ? leg.from : $("localField").value;
+      return "Local flight ("+ptLabel(code)+")";
+    }
+    return "Custom route";
+  }
+
+  // Every preset route (r1/r2/r3) is coded as an out-and-back (outbound legs, then
+  // the same legs reversed). A real FPL is filed one-way, so this takes just the
+  // first half — the outbound leg from departure to destination. A custom route is
+  // whatever sequence the user built — it is used in full, exactly as entered,
+  // departure = its first waypoint and destination = its last; build two separate
+  // custom sequences (one per direction) if you want a round trip filed as two FPLs.
+  function outboundLegs(routeKey){
+    var route = ROUTES[routeKey];
+    if(routeKey==="custom" || routeKey==="local") return route.legs;
+    var n = route.legs.length/2;
+    return route.legs.slice(0, n);
+  }
+  function outboundWinds(routeKey){
+    if(routeKey==="custom" || routeKey==="local") return state.legWinds[routeKey];
+    var n = ROUTES[routeKey].legs.length/2;
+    return state.legWinds[routeKey].slice(0, n);
+  }
+  function buildRouteString(legs){
+    return legs.map(function(leg){ return ptLabel(leg.to); }).join(" ");
+  }
+
+  // Keeps the Fuel Planning tab's own route selector, the Flight Plan tab's own
+  // route selector, and the Performance Check tab's TO/LD field defaults all
+  // following whichever route (or custom waypoint sequence) is currently
+  // selected on the Legs tabs — so a multi-waypoint/multi-landing trip is
+  // reflected everywhere without having to re-pick it on each downstream tab.
+  // Performance Check can still be pointed at a different ad-hoc pair afterward;
+  // it will only snap back the next time the route/sequence changes here.
+  function syncDownstreamRoute(routeKey){
+    var route = ROUTES[routeKey];
+    if(!route || !route.legs.length) return;
+    $("fuelRoute").value = routeKey;
+    $("fplRoute").value = routeKey;
+    var legs = outboundLegs(routeKey);
+    if(legs.length){
+      var depCode = legs[0].from, destCode = legs[legs.length-1].to;
+      var depAp = AIRPORTS[depCode], destAp = AIRPORTS[destCode];
+      if(depAp && !depAp.enroute){ $("toField").value = depCode; }
+      if(destAp && !destAp.enroute){ $("ldField").value = destCode; }
+    }
+    renderFuel();
+    renderFPL();
+    renderPerf();
+  }
+
+  function renderFPL(){
+    var routeKey = $("fplRoute").value;
+    var legs = outboundLegs(routeKey);
+    var winds = outboundWinds(routeKey);
+    var depCode = legs[0].from;
+    var destCode = legs[legs.length-1].to;
+    var depAp = AIRPORTS[depCode], destAp = AIRPORTS[destCode];
+
+    var tas = +$("fuelTas").value || 0;
+    var burn = +$("fuelBurn").value || 0;
+    var oat = +$("oat").value, qnh = +$("qnh").value || 1013;
+    var res = computeLegsFuel(legs, winds, tas, burn, oat, qnh);
+
+    var tank = $("tank").value;
+    var fuelLiters = tank==="custom" ? (+$("fuelLiters").value || 0) : (+tank);
+    var enduranceH = burn>0 ? fuelLiters/burn : 0;
+
+    var routeStr = "N"+String(Math.round(tas))+"KMH VFR "+buildRouteString(legs);
+
+    var altCode = $("fplAlternate").value;
+    var altAp = AIRPORTS[altCode];
+
+    var pob = +$("fplPob").value || 1;
+    var pic = $("fplPic").value || "—";
+    var dof = $("fplDof").value || "—";
+    var eobt = $("fplEobt").value || "—";
+    var level = $("fplLevel").value || "VFR";
+    var remarks = $("fplRemarks").value || "—";
+
+    var type = $("fplType").value || "ZZZZ";
+    var wake = $("fplWake").value;
+    var equip = $("fplEquip").value || "—";
+    var surv = $("fplSurv").value || "N";
+    var reg = $("fplReg").value || "";
+    var colour = $("fplColour").value || "—";
+    var jackets = $("fplJackets").value;
+    var dinghies = $("fplDinghies").value || "0";
+    var emergRadio = $("fplEmergRadio").value;
+    var callsign = $("fplCallsign").value || "ZZZZ";
+
+    $("fplRouteLabel").textContent = routeFullLabel(routeKey);
+
+    var identLine = reg ? callsign+" (registration "+reg+")" : callsign;
+    var remarksLine = reg ? "DOF/"+dof+" REG/"+reg.replace(/-/g,"")+" RMK/"+remarks : "DOF/"+dof+" RMK/"+remarks;
+
+    var rows = [
+      ["7",  "Aircraft identification", identLine],
+      ["8",  "Flight rules / Type of flight", "V / G"],
+      ["9",  "Number / Type / Wake turbulence category", "1 / "+type+" / "+wake],
+      ["10", "Equipment (COM/NAV / Surveillance)", equip+" / "+surv],
+      ["13", "Departure aerodrome / Time (EOBT)", depCode+" ("+depAp.name+") / "+eobt+"Z"],
+      ["15", "Cruising speed / Level / Route", routeStr+" / "+level],
+      ["16", "Destination / Total EET / Alternate", destCode+" ("+destAp.name+") / "+fmtTime(res.totalTimeH)+" / "+(altAp?(altCode+" ("+altAp.name+")"):"—")],
+      ["18", "Other information", remarksLine],
+      ["19", "Endurance", fmtTime(enduranceH)],
+      ["19", "Persons on board", String(pob)],
+      ["19", "Emergency radio", emergRadio],
+      ["19", "Survival equipment (jackets / dinghies)", jackets+" / "+dinghies],
+      ["19", "Aircraft colour and markings", colour],
+      ["19", "Pilot-in-command", pic]
+    ];
+
+    var body = $("fplBody");
+    body.innerHTML = "";
+    rows.forEach(function(r){
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td class='num' style='width:36px;color:var(--ink-dim);'>"+r[0]+"</td><td style='color:var(--ink-dim);'>"+r[1]+"</td><td>"+r[2]+"</td>";
+      body.appendChild(tr);
+    });
+
+    state.fplText = "ICAO FLIGHT PLAN — "+routeFullLabel(routeKey)+"\n"+
+      rows.map(function(r){ return "Item "+r[0]+" — "+r[1]+": "+r[2]; }).join("\n");
+
+    saveState();
+  }
+
+  function populateFieldSelects(){
+    var opts = Object.keys(AIRPORTS).filter(function(code){ return !AIRPORTS[code].enroute; }).map(function(code){
+      return "<option value='"+code+"'>"+AIRPORTS[code].name+" ("+code+")</option>";
+    }).join("");
+    $("toField").innerHTML = opts;
+    $("ldField").innerHTML = opts;
+    $("localField").innerHTML = opts;
+    $("toField").value = "UGAK";
+    $("ldField").value = "UGMS";
+    $("localField").value = "UGAK";
+  }
+
+  function populateFplAlternate(){
+    var opts = ALT_FIELDS.map(function(code){
+      var ap = AIRPORTS[code];
+      return "<option value='"+code+"'>"+ap.name+" ("+code+")</option>";
+    }).join("");
+    $("fplAlternate").innerHTML = opts;
+  }
+
+  function populateIdentLegend(){
+    var html = Object.keys(AIRPORTS).map(function(code){
+      var ap = AIRPORTS[code];
+      var shortName = ap.name.split(" (")[0];
+      return "<div class='ident-chip'><span class='code'>"+code+"</span><span class='name'>"+shortName+"</span></div>";
+    }).join("");
+    $("identLegend").innerHTML = html;
+  }
+
+  function populateWpAddSelect(){
+    var opts = Object.keys(AIRPORTS).filter(function(code){ return !AIRPORTS[code].enroute; }).map(function(code){
+      return "<option value='"+code+"'>"+AIRPORTS[code].name.split(" (")[0]+" ("+code+")</option>";
+    }).join("");
+    $("wpAddSelect").innerHTML = opts;
+  }
+
+  function renderWaypointList(){
+    var html = state.customSeq.map(function(code, i){
+      var ap = AIRPORTS[code];
+      var shortName = ap ? ap.name.split(" (")[0] : "?";
+      var removeBtn = state.customSeq.length>2 ? "<button type='button' data-remove-idx='"+i+"'>remove</button>" : "";
+      return "<div class='wp-row'><span class='wp-idx'>"+(i+1)+"</span><span class='wp-code'>"+code+"</span><span class='wp-name'>"+shortName+"</span>"+removeBtn+"</div>";
+    }).join("");
+    $("wpList").innerHTML = html;
+    $("wpList").querySelectorAll("button[data-remove-idx]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var idx = +btn.getAttribute("data-remove-idx");
+        if(state.customSeq.length>2){
+          state.customSeq.splice(idx, 1);
+          rebuildCustomRoute();
+          renderWaypointList();
+          $("legsHeading").textContent = "Legs — " + routeFullLabel("custom");
+          renderLegWinds();
+          render();
+          syncDownstreamRoute("custom");
+        }
+      });
+    });
+  }
+
+  function saveState(){
+    try{
+      var inp = readInputs();
+      var perf = {
+        toField: $("toField").value, toWindDir:+$("toWindDir").value||0, toWindSpd:+$("toWindSpd").value||0, toOat:+$("toOat").value, toQnh:+$("toQnh").value||1013,
+        ldField: $("ldField").value, ldWindDir:+$("ldWindDir").value||0, ldWindSpd:+$("ldWindSpd").value||0, ldOat:+$("ldOat").value, ldQnh:+$("ldQnh").value||1013
+      };
+      var fuel = {
+        route: $("fuelRoute").value, reserve: $("fuelReserve").value, reserveCustom:+$("fuelReserveCustom").value||45,
+        scen: $("fuelScenario").value, tas:+$("fuelTas").value, burn:+$("fuelBurn").value
+      };
+      var fpl = {
+        route: $("fplRoute").value, pic: $("fplPic").value, pob: $("fplPob").value, dof: $("fplDof").value, eobt: $("fplEobt").value,
+        level: $("fplLevel").value, alternate: $("fplAlternate").value, remarks: $("fplRemarks").value,
+        type: $("fplType").value, wake: $("fplWake").value, equip: $("fplEquip").value, surv: $("fplSurv").value, reg: $("fplReg").value,
+        colour: $("fplColour").value, jackets: $("fplJackets").value, dinghies: $("fplDinghies").value, emergRadio: $("fplEmergRadio").value,
+        callsign: $("fplCallsign").value
+      };
+      var wx = { depDate: $("depDate").value, wxTime: $("wxTime").value, wxSource: $("wxSource").value, wxNotes: $("wxNotes").value };
+      var local = { code: $("localField").value, minutes: $("localMinutes").value };
+      localStorage.setItem("flightComputer4L07007", JSON.stringify({inp:inp, route:state.route, tab:state.tab, legWinds:state.legWinds, customSeq:state.customSeq, perf:perf, fuel:fuel, fpl:fpl, wx:wx, local:local, aircraftKey:state.aircraft, aircraftData:AIRCRAFT, ts:Date.now()}));
+    }catch(e){}
+  }
+  function loadState(){
+    try{
+      var raw = localStorage.getItem("flightComputer4L07007");
+      if(!raw) return;
+      var saved = JSON.parse(raw);
+      if(saved.route) state.route = saved.route;
+      if(saved.tab) state.tab = saved.tab;
+      if(saved.aircraftData){
+        Object.keys(saved.aircraftData).forEach(function(k){
+          if(!AIRCRAFT[k]) return;
+          var sd = saved.aircraftData[k];
+          if(sd.emptyKg!==undefined) AIRCRAFT[k].emptyKg = sd.emptyKg;
+          if(sd.mtowKg!==undefined) AIRCRAFT[k].mtowKg = sd.mtowKg;
+          if(sd.poh) Object.assign(AIRCRAFT[k].poh, sd.poh);
+          if(sd.scenarios){
+            Object.keys(sd.scenarios).forEach(function(sk){
+              if(AIRCRAFT[k].scenarios[sk]) Object.assign(AIRCRAFT[k].scenarios[sk], sd.scenarios[sk]);
+            });
+          }
+          if(sd.tanks && sd.tanks.length) AIRCRAFT[k].tanks = sd.tanks.slice();
+          if(sd.fpl) Object.assign(AIRCRAFT[k].fpl, sd.fpl);
+        });
+      }
+      var aircraftKey = (saved.aircraftKey && AIRCRAFT[saved.aircraftKey]) ? saved.aircraftKey : state.aircraft;
+      $("aircraftSelect").value = aircraftKey;
+      applyAircraft(aircraftKey);
+      if(saved.customSeq && saved.customSeq.length>=2){
+        var validSeq = saved.customSeq.every(function(c){ return AIRPORTS[c] && !AIRPORTS[c].enroute; });
+        if(validSeq){ state.customSeq = saved.customSeq; }
+      }
+      rebuildCustomRoute();
+      if(saved.local){
+        if(saved.local.code && AIRPORTS[saved.local.code] && !AIRPORTS[saved.local.code].enroute){ $("localField").value = saved.local.code; }
+        if(saved.local.minutes!==undefined){ $("localMinutes").value = saved.local.minutes; }
+      }
+      rebuildLocalRoute();
+      if(saved.legWinds){
+        Object.keys(ROUTES).forEach(function(r){
+          if(saved.legWinds[r] && saved.legWinds[r].length===ROUTES[r].legs.length){ state.legWinds[r] = saved.legWinds[r]; }
+        });
+      }
+      var i = saved.inp;
+      if(i){
+        $("oat").value = i.oat; $("qnh").value = i.qnh;
+        $("scenario").value = i.scen;
+        $("tas").value = i.tas; $("burn").value = i.burn;
+        $("pilot").value = i.pilot; $("baggage").value = i.baggage;
+        $("pax").value = i.pax || 77;
+        $("paxOn").checked = i.pax>0;
+        if(TANKS.indexOf(+i.fuelLiters)!==-1){
+          $("tank").value = String(i.fuelLiters);
+        } else {
+          $("tank").value = "custom";
+          $("fuelLiters").value = i.fuelLiters;
+        }
+        if(i.altWindDir!==undefined){ $("altWindDir").value = i.altWindDir; $("altWindSpd").value = i.altWindSpd; }
+        if(i.altOat!==undefined){ $("altOat").value = i.altOat; $("altQnh").value = i.altQnh; }
+      }
+      var p = saved.perf;
+      if(p){
+        if(p.toField){ $("toField").value = p.toField; }
+        if(p.toWindDir!==undefined){ $("toWindDir").value = p.toWindDir; $("toWindSpd").value = p.toWindSpd; }
+        if(p.toOat!==undefined){ $("toOat").value = p.toOat; $("toQnh").value = p.toQnh; }
+        if(p.ldField){ $("ldField").value = p.ldField; }
+        if(p.ldWindDir!==undefined){ $("ldWindDir").value = p.ldWindDir; $("ldWindSpd").value = p.ldWindSpd; }
+        if(p.ldOat!==undefined){ $("ldOat").value = p.ldOat; $("ldQnh").value = p.ldQnh; }
+      }
+      var f = saved.fuel;
+      if(f){
+        if(f.route){ $("fuelRoute").value = f.route; }
+        if(f.reserve){ $("fuelReserve").value = f.reserve; }
+        if(f.reserveCustom!==undefined){ $("fuelReserveCustom").value = f.reserveCustom; }
+        if(f.scen){ $("fuelScenario").value = f.scen; }
+        if(f.tas!==undefined){ $("fuelTas").value = f.tas; }
+        if(f.burn!==undefined){ $("fuelBurn").value = f.burn; }
+      }
+      var g = saved.fpl;
+      if(g){
+        if(g.route){ $("fplRoute").value = g.route; }
+        if(g.pic!==undefined){ $("fplPic").value = g.pic; }
+        if(g.pob!==undefined){ $("fplPob").value = g.pob; }
+        if(g.dof!==undefined){ $("fplDof").value = g.dof; }
+        if(g.eobt!==undefined){ $("fplEobt").value = g.eobt; }
+        if(g.level!==undefined){ $("fplLevel").value = g.level; }
+        if(g.alternate){ $("fplAlternate").value = g.alternate; }
+        if(g.remarks!==undefined){ $("fplRemarks").value = g.remarks; }
+        if(g.type!==undefined){ $("fplType").value = g.type; }
+        if(g.wake){ $("fplWake").value = g.wake; }
+        if(g.equip!==undefined){ $("fplEquip").value = g.equip; }
+        if(g.surv!==undefined){ $("fplSurv").value = g.surv; }
+        if(g.reg!==undefined){ $("fplReg").value = g.reg; }
+        if(g.colour!==undefined){ $("fplColour").value = g.colour; }
+        if(g.jackets){ $("fplJackets").value = g.jackets; }
+        if(g.dinghies!==undefined){ $("fplDinghies").value = g.dinghies; }
+        if(g.emergRadio){ $("fplEmergRadio").value = g.emergRadio; }
+        if(g.callsign!==undefined){ $("fplCallsign").value = g.callsign; }
+
+        // Item 10 has been corrected three times as the actual avionics fit for 03-AKA was
+        // verified against GCAA paperwork: first from the tool's original stock default
+        // (S/N — VHF+VOR+ILS, no surveillance — never actually true for this airframe) to
+        // VHF+transponder-only (VY/S); then briefly to GVY/S once onboard GPS was reported;
+        // then back to VY/S once that GPS was confirmed to be a portable unit, not installed/
+        // certified equipment — ICAO's "G" code only applies to a permanently installed GNSS
+        // receiver, so a portable GPS is correctly left out of Item 10a. A saved profile still
+        // showing any of the superseded pairs is auto-upgraded to the current verified codes
+        // here, so the fix reaches returning users without them re-typing it — a value outside
+        // those known pairs (a deliberate custom entry) is left untouched.
+        var equipWasDefault = ["S","VY","GVY"].indexOf($("fplEquip").value)!==-1;
+        var survWasDefault = ["N","S"].indexOf($("fplSurv").value)!==-1;
+        if(equipWasDefault && survWasDefault){
+          var acFplNow = AIRCRAFT[aircraftKey] ? AIRCRAFT[aircraftKey].fpl : null;
+          if(acFplNow){ $("fplEquip").value = acFplNow.equip; $("fplSurv").value = acFplNow.surv; }
+        }
+      }
+      var w = saved.wx;
+      if(w){
+        if(w.depDate){ $("depDate").value = w.depDate; }
+        if(w.wxTime!==undefined){ $("wxTime").value = w.wxTime; }
+        if(w.wxSource!==undefined){ $("wxSource").value = w.wxSource; }
+        if(w.wxNotes!==undefined){ $("wxNotes").value = w.wxNotes; }
+      }
+    }catch(e){}
+  }
+
+  function updateScenarioLock(){
+    var scen = $("scenario").value;
+    if(scen==="custom"){
+      $("tas").disabled=false; $("burn").disabled=false;
+    } else {
+      $("tas").disabled=true; $("burn").disabled=true;
+      $("tas").value = SCENARIOS[scen].tas;
+      $("burn").value = SCENARIOS[scen].burn;
+    }
+  }
+  function updateTankWrap(){
+    $("fuelLitersWrap").style.display = $("tank").value==="custom" ? "block" : "none";
+  }
+  function updatePaxWrap(){
+    $("paxWrap").style.display = $("paxOn").checked ? "block" : "none";
+  }
+  function updateFuelScenarioLock(){
+    var scen = $("fuelScenario").value;
+    if(scen==="custom"){
+      $("fuelTas").disabled=false; $("fuelBurn").disabled=false;
+    } else {
+      $("fuelTas").disabled=true; $("fuelBurn").disabled=true;
+      $("fuelTas").value = SCENARIOS[scen].tas;
+      $("fuelBurn").value = SCENARIOS[scen].burn;
+    }
+  }
+  function updateFuelReserveWrap(){
+    $("fuelReserveCustomWrap").style.display = $("fuelReserve").value==="custom" ? "block" : "none";
+  }
+
+  function setMode(tab){
+    state.tab = tab;
+    $("tab-r1").setAttribute("aria-selected", tab==="r1" ? "true":"false");
+    $("tab-r2").setAttribute("aria-selected", tab==="r2" ? "true":"false");
+    $("tab-r3").setAttribute("aria-selected", tab==="r3" ? "true":"false");
+    $("tab-custom").setAttribute("aria-selected", tab==="custom" ? "true":"false");
+    $("tab-local").setAttribute("aria-selected", tab==="local" ? "true":"false");
+    $("tab-perf").setAttribute("aria-selected", tab==="perf" ? "true":"false");
+    $("tab-fuel").setAttribute("aria-selected", tab==="fuel" ? "true":"false");
+    $("tab-fpl").setAttribute("aria-selected", tab==="fpl" ? "true":"false");
+    var isPerf = tab==="perf";
+    var isFuel = tab==="fuel";
+    var isFpl = tab==="fpl";
+    var isCustom = tab==="custom";
+    var isLocal = tab==="local";
+    var isRoute = !isPerf && !isFuel && !isFpl;
+    document.querySelectorAll(".route-only").forEach(function(el){ el.style.display = isRoute ? "block" : "none"; });
+    document.querySelectorAll(".custom-only").forEach(function(el){ el.style.display = isCustom ? "block" : "none"; });
+    document.querySelectorAll(".local-only").forEach(function(el){ el.style.display = isLocal ? "block" : "none"; });
+    document.querySelectorAll(".perf-only").forEach(function(el){ el.style.display = isPerf ? "block" : "none"; });
+    document.querySelectorAll(".fuel-only").forEach(function(el){ el.style.display = isFuel ? "block" : "none"; });
+    document.querySelectorAll(".fpl-only").forEach(function(el){ el.style.display = isFpl ? "block" : "none"; });
+    if(isPerf){
+      renderPerf();
+    } else if(isFuel){
+      renderFuel();
+    } else if(isFpl){
+      renderFPL();
+    } else {
+      state.route = tab;
+      if(isCustom){ rebuildCustomRoute(); renderWaypointList(); }
+      if(isLocal){ rebuildLocalRoute(); }
+      $("legsHeading").textContent = "Legs — " + routeFullLabel(tab);
+      renderLegWinds();
+      render();
+      syncDownstreamRoute(tab);
+    }
+  }
+
+  ["oat","qnh","tas","burn","pilot","baggage","pax","fuelLiters","altWindDir","altWindSpd","altOat","altQnh"].forEach(function(id){
+    $(id).addEventListener("input", render);
+  });
+  ["toWindDir","toWindSpd","toOat","toQnh","ldWindDir","ldWindSpd","ldOat","ldQnh"].forEach(function(id){
+    $(id).addEventListener("input", renderPerf);
+  });
+  ["fuelTas","fuelBurn","fuelReserveCustom"].forEach(function(id){
+    $(id).addEventListener("input", renderFuel);
+  });
+  $("toField").addEventListener("change", renderPerf);
+  $("ldField").addEventListener("change", renderPerf);
+  $("scenario").addEventListener("change", function(){ updateScenarioLock(); render(); });
+  $("tank").addEventListener("change", function(){ updateTankWrap(); render(); });
+  $("paxOn").addEventListener("change", function(){ updatePaxWrap(); render(); });
+  $("fuelRoute").addEventListener("change", renderFuel);
+  $("fuelScenario").addEventListener("change", function(){ updateFuelScenarioLock(); renderFuel(); });
+  $("fuelReserve").addEventListener("change", function(){ updateFuelReserveWrap(); renderFuel(); });
+  ["fplPic","fplPob","fplDof","fplEobt","fplLevel","fplRemarks","fplType","fplEquip","fplSurv","fplReg","fplColour","fplDinghies","fplCallsign"].forEach(function(id){
+    $(id).addEventListener("input", renderFPL);
+  });
+  ["fplRoute","fplAlternate","fplWake","fplJackets","fplEmergRadio"].forEach(function(id){
+    $(id).addEventListener("change", renderFPL);
+  });
+  $("depDate").addEventListener("change", function(){
+    var dof = isoToDOF($("depDate").value);
+    if(dof){ $("fplDof").value = dof; }
+    renderFPL();
+  });
+  ["wxTime","wxSource","wxNotes"].forEach(function(id){
+    $(id).addEventListener("input", saveState);
+  });
+  $("fplCopyBadge").addEventListener("click", function(){
+    var text = state.fplText || "";
+    var el = $("fplCopyBadge");
+    var orig = el.textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){
+        el.textContent = "copied!";
+        setTimeout(function(){ el.textContent = orig; }, 1500);
+      }).catch(function(){});
+    }
+  });
+  $("tab-r1").addEventListener("click", function(){ setMode("r1"); });
+  $("tab-r2").addEventListener("click", function(){ setMode("r2"); });
+  $("tab-r3").addEventListener("click", function(){ setMode("r3"); });
+  $("tab-custom").addEventListener("click", function(){ setMode("custom"); });
+  $("tab-local").addEventListener("click", function(){ setMode("local"); });
+  $("tab-perf").addEventListener("click", function(){ setMode("perf"); });
+  $("tab-fuel").addEventListener("click", function(){ setMode("fuel"); });
+  $("tab-fpl").addEventListener("click", function(){ setMode("fpl"); });
+
+  $("wpAddBtn").addEventListener("click", function(){
+    var code = $("wpAddSelect").value;
+    if(!code) return;
+    state.customSeq.push(code);
+    rebuildCustomRoute();
+    renderWaypointList();
+    $("legsHeading").textContent = "Legs — " + routeFullLabel("custom");
+    renderLegWinds();
+    render();
+    syncDownstreamRoute("custom");
+  });
+  $("wpMirrorBtn").addEventListener("click", function(){
+    var seq = state.customSeq;
+    if(seq.length<2) return;
+    var mirror = seq.slice(0, seq.length-1).reverse();
+    state.customSeq = seq.concat(mirror);
+    rebuildCustomRoute();
+    renderWaypointList();
+    $("legsHeading").textContent = "Legs — " + routeFullLabel("custom");
+    renderLegWinds();
+    render();
+    syncDownstreamRoute("custom");
+  });
+  $("wpClearBtn").addEventListener("click", function(){
+    state.customSeq = ["UGAK","UGKO"];
+    rebuildCustomRoute();
+    renderWaypointList();
+    $("legsHeading").textContent = "Legs — " + routeFullLabel("custom");
+    renderLegWinds();
+    render();
+    syncDownstreamRoute("custom");
+  });
+
+  ["localField","localMinutes"].forEach(function(id){
+    $(id).addEventListener(id==="localField" ? "change" : "input", function(){
+      rebuildLocalRoute();
+      $("legsHeading").textContent = "Legs — " + routeFullLabel("local");
+      renderLegWinds();
+      render();
+      syncDownstreamRoute("local");
+    });
+  });
+
+  $("aircraftSelect").addEventListener("change", function(){
+    applyAircraft($("aircraftSelect").value);
+    updateScenarioLock();
+    updateFuelScenarioLock();
+    updateTankWrap();
+    render();
+    renderPerf();
+    renderFuel();
+    renderFPL();
+    saveState();
+  });
+  ["acEmptyKg","acMtowKg","acVy","acClimbSL","acToRoll","acTo15m","acLdRoll","acLd15m","acMaxXwind","acTank1Cap","acTank2Cap","acEconTas","acEconBurn","acNormTas","acNormBurn","acConsTas","acConsBurn"].forEach(function(id){
+    $(id).addEventListener("input", function(){
+      updateAircraftFromFields();
+      populateScenarioOptions();
+      populateTankOptions();
+      updateScenarioLock();
+      updateFuelScenarioLock();
+      render();
+      renderPerf();
+      renderFuel();
+      renderFPL();
+    });
+  });
+
+  populateAircraftSelect();
+  applyAircraft(state.aircraft);
+  populateFieldSelects();
+  populateFplAlternate();
+  populateIdentLegend();
+  populateWpAddSelect();
+  rebuildCustomRoute();
+  rebuildLocalRoute();
+  loadState();
+  renderWaypointList();
+  updateScenarioLock();
+  updateTankWrap();
+  updatePaxWrap();
+  updateFuelScenarioLock();
+  updateFuelReserveWrap();
+  setMode(state.tab);
+})();
+</script>
+
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+}
+</script>
+</body></html>
