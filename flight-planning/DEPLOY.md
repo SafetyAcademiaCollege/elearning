@@ -8,6 +8,7 @@ Upload the folder as-is so the files sit at:
 ```
 /flight-planning/.htaccess
 /flight-planning/index.html
+/flight-planning/i18n.js
 /flight-planning/sw.js
 /flight-planning/manifest.webmanifest
 /flight-planning/icons/icon.svg

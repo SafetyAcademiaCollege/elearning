@@ -1,7 +1,7 @@
 // Offline cache for the flight computer. Bump VERSION on every release so
 // installed copies pick up new reference data (AIRAC changes, aircraft, routes).
-var VERSION = "fp-2026-11-16-1";
-var CORE = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon.svg", "./icons/icon-192.png", "./icons/icon-512.png"];
+var VERSION = "fp-2026-11-16-2";
+var CORE = ["./", "./index.html", "./i18n.js", "./manifest.webmanifest", "./icons/icon.svg", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(CORE); }).then(function () { return self.skipWaiting(); }));

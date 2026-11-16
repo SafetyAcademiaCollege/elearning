@@ -17,7 +17,7 @@
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#EDF0E8; --ink:#1B2620; --ink-dim:#54635A;
@@ -142,6 +142,15 @@
   .caveat{font-size:12px; color:var(--ink-dim); margin-top:10px; line-height:1.5;}
 </style>
 
+<style>
+  .lang-switch{order:-1; margin-left:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; letter-spacing:.06em; padding:5px 12px; border-radius:5px; border:1px solid var(--route); background:transparent; color:var(--route); cursor:pointer;}
+  header{position:relative;}
+  html[lang="ka"] body{font-family:'Public Sans','Noto Sans Georgian',system-ui,sans-serif;}
+  html[lang="ka"] h1, html[lang="ka"] h2, html[lang="ka"] h3, html[lang="ka"] .eyebrow, html[lang="ka"] .tab, html[lang="ka"] th, html[lang="ka"] .pill{font-family:'Barlow Condensed','Noto Sans Georgian',sans-serif;}
+  html[lang="ka"] .field select, html[lang="ka"] .wp-controls select, html[lang="ka"] .wp-controls button{font-family:'Public Sans','Noto Sans Georgian',sans-serif;}
+  html[lang="ka"] *{text-transform:none !important;}
+  html[lang="ka"] .eyebrow, html[lang="ka"] th, html[lang="ka"] .panel h2, html[lang="ka"] .stat .k{letter-spacing:.02em;}
+</style>
 <header>
   <div>
     <div class="eyebrow">OCC Flight Planning · Live Recalculation</div>
@@ -239,7 +248,7 @@
 
     <div class="panel route-only">
       <h2>Leg Winds</h2>
-      <div class="legwind-head"><span>Leg</span><span>Dir °T</span><span>kt/h</span></div>
+      <div class="legwind-head"><span>Leg</span><span>Dir °T</span><span>km/h</span></div>
       <div id="legWindsBody"></div>
       <p class="hint">Wind FROM direction and speed (km/h), set independently for each leg — mountain legs (e.g. into Mestia) often differ sharply from valley legs.</p>
     </div>
@@ -1823,6 +1832,7 @@
 })();
 </script>
 
+<script src="i18n.js"></script>
 <script>
 if("serviceWorker" in navigator){
   window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
