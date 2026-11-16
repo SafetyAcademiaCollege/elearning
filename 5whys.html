@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>5 Whys Investigator | Safety Academia</title>
+<meta name="description" content="Safety Academia 5 Whys root cause analysis tool for OSH incident and near-miss investigation, with CAPA planning and printable reports."/>
+<meta name="theme-color" content="#C0272D"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--red:#C0272D;--red-dark:#96191E;--red-light:#e8474d;--dark:#1a1a1a;--dark2:#222;--dark3:#2d2d2d;--card:#2a2a2a;--border:#3a3a3a;--text:#f0f0f0;--muted:#a0a0a0;--green:#2ecc71;--amber:#f0b429;--blue:#5aa9e6;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans',system-ui,sans-serif;background:var(--dark);color:var(--text);min-height:100vh;font-size:15px;line-height:1.55;}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+.topnav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 32px;background:linear-gradient(135deg,#0f0f0f,#1a0505);border-bottom:1px solid rgba(192,39,45,.25);position:sticky;top:0;z-index:50;flex-wrap:wrap;}
+.logo-row{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;}
+.logo-mark{width:40px;height:40px;border-radius:8px;background:var(--red);display:grid;place-items:center;font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;color:#fff;}
+.logo-name{font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;letter-spacing:1px;}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.nav-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.ai-pill{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--dark3);color:var(--muted);cursor:pointer;}
+.ai-pill.on{border-color:rgba(46,204,113,.5);color:var(--green);}
+.ai-pill .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:1px;}
+
+.btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:5px;cursor:pointer;font-weight:600;font-size:13px;transition:background .15s,border-color .15s;}
+.btn:hover{border-color:#555;background:#333;}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff;}
+.btn.primary:hover{background:var(--red-light);}
+.btn.ghost{background:transparent;}
+.btn.small{padding:6px 11px;font-size:12px;}
+.btn.ai{border-color:rgba(90,169,230,.5);color:var(--blue);background:rgba(90,169,230,.07);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+.layout{max-width:1100px;margin:0 auto;padding:28px 24px 80px;display:grid;grid-template-columns:230px 1fr;gap:28px;}
+.steps{position:sticky;top:90px;align-self:start;display:flex;flex-direction:column;gap:4px;}
+.step-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;border:1px solid transparent;background:transparent;cursor:pointer;text-align:left;color:var(--muted);font-weight:600;font-size:14px;}
+.step-btn .n{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);display:grid;place-items:center;font-size:12px;flex-shrink:0;}
+.step-btn.done .n{border-color:var(--green);color:var(--green);}
+.step-btn.active{background:var(--card);border-color:var(--border);color:var(--text);}
+.step-btn.active .n{background:var(--red);border-color:var(--red);color:#fff;}
+.side-tools{margin-top:18px;padding-top:16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;}
+.side-tools .btn{text-align:left;}
+
+h1{font-family:'Oswald',sans-serif;font-size:30px;font-weight:600;letter-spacing:.5px;margin-bottom:6px;}
+h2{font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;letter-spacing:.4px;margin-bottom:4px;}
+h3{font-size:15px;font-weight:700;margin-bottom:6px;}
+.lead{color:var(--muted);margin-bottom:22px;max-width:680px;}
+.panel{background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:22px;margin-bottom:18px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+label.f{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
+.field{margin-bottom:14px;}
+input[type=text],input[type=date],input[type=time],select,textarea{width:100%;background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:10px 12px;outline:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--red);}
+textarea{resize:vertical;min-height:70px;}
+.hint{font-size:12.5px;color:var(--muted);margin-top:5px;}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.spacer{flex:1;}
+.footer-nav{display:flex;justify-content:space-between;margin-top:8px;}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.chip{font-size:12.5px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--muted);}
+.chip:hover{border-color:var(--red);color:var(--text);}
+
+/* Why chain */
+.chain{position:relative;}
+.why{position:relative;padding-left:46px;margin-bottom:16px;}
+.why::before{content:"";position:absolute;left:17px;top:38px;bottom:-20px;width:2px;background:var(--border);}
+.why:last-child::before{display:none;}
+.why .bubble{position:absolute;left:0;top:4px;width:36px;height:36px;border-radius:50%;background:var(--dark3);border:2px solid var(--red);display:grid;place-items:center;font-family:'Oswald',sans-serif;font-weight:600;}
+.why .card{background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.why .q{font-size:13.5px;color:var(--muted);margin-bottom:8px;}
+.why .q b{color:var(--text);font-weight:600;}
+.why textarea.ans{min-height:56px;font-size:15px;}
+.verify{display:flex;gap:6px;font-size:12.5px;}
+.verify label{display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;cursor:pointer;color:var(--muted);}
+.verify input{accent-color:var(--green);}
+.verify label.on{border-color:rgba(46,204,113,.5);color:var(--green);}
+.flags{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
+.flag{font-size:13px;padding:7px 10px;border-radius:6px;border-left:3px solid var(--amber);background:rgba(240,180,41,.08);}
+.flag.ok{border-color:var(--green);background:rgba(46,204,113,.08);}
+.flag.info{border-color:var(--blue);background:rgba(90,169,230,.08);}
+.ai-box{margin-top:10px;padding:12px 14px;border-radius:8px;background:rgba(90,169,230,.07);border:1px solid rgba(90,169,230,.3);font-size:13.5px;}
+.ai-box h4{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:6px;}
+.ai-box ul{margin:6px 0 0 18px;}
+.ai-box .use{margin-top:8px;}
+.root-banner{margin:6px 0 18px 46px;padding:12px 14px;border-radius:8px;border:1px dashed var(--green);color:var(--green);font-size:13.5px;}
+
+/* Root cause checks */
+.checks{display:flex;flex-direction:column;gap:8px;}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;}
+.check input{margin-top:4px;accent-color:var(--green);width:16px;height:16px;}
+.check.on{border-color:rgba(46,204,113,.5);}
+.check small{display:block;color:var(--muted);font-size:12.5px;}
+
+/* Actions */
+.action{border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;background:var(--dark2);}
+.action .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.level-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;letter-spacing:.5px;text-transform:uppercase;}
+.lv-Elimination{background:#1e7d46;color:#fff;}.lv-Substitution{background:#3c9a4f;color:#fff;}.lv-Engineering{background:#2f6fa8;color:#fff;}.lv-Administrative{background:#b07d12;color:#fff;}.lv-PPE{background:#8a2a2a;color:#fff;}
+.hoc{display:flex;gap:3px;margin:6px 0 16px;}
+.hoc div{flex:1;text-align:center;font-size:11px;font-weight:700;padding:6px 2px;color:#fff;letter-spacing:.3px;}
+.hoc div:first-child{border-radius:6px 0 0 6px;}.hoc div:last-child{border-radius:0 6px 6px 0;}
+
+/* Report */
+.report{background:#fff;color:#1a1a1a;border-radius:10px;padding:36px 40px;font-size:14px;}
+.report h1{font-size:24px;color:#1a1a1a;}
+.report h2{font-size:16px;color:var(--red);border-bottom:2px solid var(--red);padding-bottom:4px;margin:24px 0 10px;text-transform:uppercase;letter-spacing:1px;}
+.report .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 20px;font-size:13px;}
+.report .meta b{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:#777;}
+.report table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.report th,.report td{border:1px solid #ddd;padding:7px 8px;text-align:left;vertical-align:top;}
+.report th{background:#f4f4f4;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+.report .rc{border-left:4px solid var(--red);background:#fdf3f3;padding:12px 14px;font-weight:600;}
+.report .muted{color:#777;}
+.report .brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #ddd;padding-bottom:14px;margin-bottom:16px;}
+.report .brand .b{font-family:'Oswald',sans-serif;color:var(--red);font-size:15px;letter-spacing:1px;}
+.report .sign{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:30px;font-size:12.5px;}
+.report .sign div{border-top:1px solid #999;padding-top:6px;}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:560px;width:100%;max-height:85vh;overflow:auto;}
+.inv-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
+.inv-item .t{flex:1;cursor:pointer;}
+.inv-item small{color:var(--muted);display:block;}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111;border:1px solid var(--border);padding:10px 18px;border-radius:8px;font-size:13.5px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:200;}
+.toast.show{opacity:1;}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px;margin-right:6px;}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media (max-width:820px){
+  .layout{grid-template-columns:1fr;padding:18px 16px 70px;gap:16px;}
+  .steps{position:static;flex-direction:row;overflow-x:auto;gap:4px;}
+  .step-btn{flex-shrink:0;padding:8px 10px;}
+  .step-btn .lbl{display:none;}
+  .step-btn.active .lbl{display:inline;}
+  .side-tools{display:none;}
+  .mobile-tools{display:flex !important;}
+  .grid2,.grid3,.report .meta{grid-template-columns:1fr;}
+  .topnav{padding:12px 16px;}
+  .report{padding:22px 18px;}
+  .why{padding-left:40px;}.why .bubble{width:32px;height:32px;}.why::before{left:15px;}
+  .root-banner{margin-left:40px;}
+}
+.mobile-tools{display:none;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+
+@media print{
+  body{background:#fff;}
+  .topnav,.steps,.no-print,.toast,.modal-bg,.mobile-tools{display:none !important;}
+  .layout{display:block;padding:0;max-width:none;}
+  .report{padding:0;border-radius:0;}
+  .report h2{break-after:avoid;}
+  .report table,.report .rc{break-inside:avoid;}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="logo-row" href="index.html" title="Back to Safety Academia e-learning">
+    <div class="logo-mark">5W</div>
+    <div><div class="logo-name">SAFETY ACADEMIA</div><div class="logo-sub">5 Whys Investigator</div></div>
+  </a>
+  <div class="nav-right">
+    <button class="ai-pill" id="aiPill" onclick="openSettings()"><span class="dot"></span><span id="aiPillText">AI coach: checking…</span></button>
+    <button class="btn small" onclick="openList()">My investigations</button>
+    <button class="btn small primary" onclick="newInvestigation()">+ New</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside>
+    <div class="steps" id="steps"></div>
+    <div class="side-tools">
+      <button class="btn small ghost" onclick="loadExample()">Load worked example</button>
+      <button class="btn small ghost" onclick="exportJSON()">Export (.json)</button>
+      <button class="btn small ghost" onclick="document.getElementById('importFile').click()">Import (.json)</button>
+      <button class="btn small ghost" onclick="openSettings()">AI settings</button>
+    </div>
+  </aside>
+  <main>
+    <div class="mobile-tools no-print">
+      <button class="btn small ghost" onclick="loadExample()">Worked example</button>
+      <button class="btn small ghost" onclick="exportJSON()">Export</button>
+      <button class="btn small ghost" onclick="document.getElementById('importFile').click()">Import</button>
+    </div>
+    <div id="view"></div>
+  </main>
+</div>
+
+<input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importJSON(event)"/>
+
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Constants ---------- */
+const STORE_KEY = 'sa5w.investigations.v1';
+const CUR_KEY = 'sa5w.current.v1';
+const CFG_KEY = 'sa5w.config.v1';
+const STEPS = [
+  {id:'incident', label:'Incident details'},
+  {id:'problem',  label:'Problem statement'},
+  {id:'whys',     label:'Ask why'},
+  {id:'root',     label:'Root cause'},
+  {id:'actions',  label:'Action plan (CAPA)'},
+  {id:'report',   label:'Report'}
+];
+const TYPES = ['Near miss','First aid injury','Medical treatment injury','Lost time injury','Dangerous occurrence','Property / equipment damage','Environmental release','Occupational illness','Fire','Vehicle / mobile plant'];
+const SEVERITY = ['Low','Moderate','High','Critical'];
+const CATEGORIES = ['Procedures / work methods','Training / competence','Supervision','Equipment / design','Maintenance / inspection','Communication','Planning / resourcing','Management of change','Work environment','Safety culture / leadership','Contractor management','Other'];
+const LEVELS = ['Elimination','Substitution','Engineering','Administrative','PPE'];
+const LEVEL_COLORS = {Elimination:'#1e7d46',Substitution:'#3c9a4f',Engineering:'#2f6fa8',Administrative:'#b07d12',PPE:'#8a2a2a'};
+const STATUSES = ['Open','In progress','Done','Verified effective'];
+
+/* ---------- State ---------- */
+let inv = null;
+let step = 'incident';
+let aiState = {ok:false, checked:false};
+const aiNotes = {}; // per-why AI feedback (not persisted)
+let summaryAI = null;
+
+function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);}
+function blank(){
+  return {id:uid(), created:new Date().toISOString(), updated:new Date().toISOString(),
+    details:{title:'',type:'',severity:'',date:'',time:'',location:'',dept:'',description:'',immediate:'',investigator:'',team:''},
+    problem:'', whys:[{answer:'',evidence:'',verified:false}],
+    rootCause:{statement:'',category:'',checks:{control:false,prevent:false,evidence:false,system:false}},
+    factors:'', actions:[], lessons:''};
+}
+function safeGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function safeSet(k,v){try{localStorage.setItem(k,v);return true;}catch(e){return false;}}
+function allInv(){try{return JSON.parse(safeGet(STORE_KEY)||'{}');}catch(e){return {};}}
+function cfg(){try{return Object.assign({endpoint:'/api/five-whys'},JSON.parse(safeGet(CFG_KEY)||'{}'));}catch(e){return {endpoint:'/api/five-whys'};}}
+let saveTimer=null;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    inv.updated=new Date().toISOString();
+    const all=allInv(); all[inv.id]=inv;
+    safeSet(STORE_KEY,JSON.stringify(all)); safeSet(CUR_KEY,inv.id);
+    renderSteps();
+  },300);
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400);}
+function getPath(obj,path){return path.split('.').reduce((o,k)=>o?.[k],obj);}
+function setPath(obj,path,val){const ks=path.split('.');const last=ks.pop();const tgt=ks.reduce((o,k)=>o[k],obj);tgt[last]=val;}
+
+/* ---------- Rule-based coach ---------- */
+const BLAME = [
+  [/\bhuman error\b/i,'"Human error" describes what happened, not why. Ask what made the error likely: task design, time pressure, fatigue, unclear labels, training.'],
+  [/\b(operator|worker|driver|employee|pilot|technician) error\b/i,'Naming someone\'s error is a symptom, not a cause. Ask what in the system allowed it.'],
+  [/\b(careless|carelessness|negligen\w*|lazy|stupid|reckless|complacen\w*|incompeten\w*)\b/i,'Blame language. Investigators describe actions and conditions, not character. Rewrite factually and ask what shaped the behaviour.'],
+  [/\b(didn'?t|did not|failed to|forgot to) (pay attention|be careful|concentrate|focus|look)\b/i,'"Didn\'t pay attention" stops the analysis. What was competing for attention, and why was the hazard not designed out?'],
+  [/\b(didn'?t|did not|failed to) follow (the )?(procedure|rules?|instructions?|sop)\b/i,'Procedure not followed: ask why. Was it known, practical, enforced, or routinely bypassed to get the job done?'],
+  [/\b(bad luck|accident just happened|act of god|unavoidable|freak)\b/i,'Chance is not a cause you can act on. What conditions made this outcome possible?']
+];
+const VAGUE = /\b(something|somehow|stuff|things|whatever|etc\.?|maybe|probably|i think|might have|not sure)\b/i;
+function wordsOf(s){return (s.toLowerCase().match(/[a-z0-9']+/g)||[]);}
+function similarity(a,b){const A=new Set(wordsOf(a)),B=new Set(wordsOf(b));if(!A.size||!B.size)return 0;let i=0;A.forEach(w=>{if(B.has(w))i++;});return i/Math.min(A.size,B.size);}
+const SYSTEM_WORDS = /\b(procedure|policy|training|induction|supervis\w*|maintenance|inspection|design|risk assessment|planning|schedul\w*|staffing|resourc\w*|budget|management|system|standard|permit|checklist|change|contractor|procurement|competenc\w*|audit|monitoring|culture|resourcing|workload)\b/i;
+
+function analyzeWhy(i){
+  const w=inv.whys[i]; const a=(w.answer||'').trim(); const out=[];
+  if(!a) return out;
+  BLAME.forEach(([re,msg])=>{if(re.test(a))out.push({lvl:'warn',msg});});
+  const n=wordsOf(a).length;
+  if(n<5) out.push({lvl:'warn',msg:'Very short. A good answer says what, where and how specifically, so someone else could check it.'});
+  if(VAGUE.test(a)) out.push({lvl:'warn',msg:'Uncertain or vague wording. Either confirm it with evidence or mark it as an assumption to verify.'});
+  const prev = i===0 ? inv.problem : inv.whys[i-1].answer;
+  if(prev && similarity(a,prev)>0.8 && n>3) out.push({lvl:'warn',msg:'This mostly repeats the statement above. Each why should go one level deeper.'});
+  if(!w.evidence.trim()) out.push({lvl:'info',msg:'No evidence recorded. Add what you saw, measured, read or were told, and by whom (role, not name).'});
+  if(i>=2 && SYSTEM_WORDS.test(a) && !out.some(f=>f.lvl==='warn')) out.push({lvl:'ok',msg:'This points at the management system. Check it against the root-cause tests before you stop.'});
+  return out;
+}
+function analyzeProblem(p){
+  const out=[]; const t=(p||'').trim(); if(!t) return out;
+  BLAME.forEach(([re,msg])=>{if(re.test(t))out.push({lvl:'warn',msg:'The problem statement should describe the event, not who caused it. '+msg});});
+  if(/\bbecause\b/i.test(t)) out.push({lvl:'warn',msg:'Leave "because" out of the problem statement. Causes belong in the why chain.'});
+  if(wordsOf(t).length<8) out.push({lvl:'warn',msg:'Too brief. Include what happened, where, when, and the consequence or potential consequence.'});
+  if(!/\d/.test(t)) out.push({lvl:'info',msg:'Add specifics: a date, time, quantity or measurement makes the statement testable.'});
+  return out;
+}
+function flagsHTML(fl){return fl.length?'<div class="flags">'+fl.map(f=>`<div class="flag ${f.lvl==='ok'?'ok':f.lvl==='info'?'info':''}">${esc(f.msg)}</div>`).join('')+'</div>':'';}
+
+/* ---------- Progress ---------- */
+function stepDone(id){
+  const d=inv.details;
+  switch(id){
+    case 'incident': return !!(d.title&&d.type&&d.date&&d.description);
+    case 'problem': return inv.problem.trim().length>20;
+    case 'whys': return inv.whys.filter(w=>w.answer.trim()).length>=3;
+    case 'root': return !!(inv.rootCause.statement.trim()&&inv.rootCause.category);
+    case 'actions': return inv.actions.length>0 && inv.actions.every(a=>a.desc&&a.owner&&a.due);
+    default: return false;
+  }
+}
+function renderSteps(){
+  document.getElementById('steps').innerHTML=STEPS.map((s,i)=>
+    `<button class="step-btn ${s.id===step?'active':''} ${stepDone(s.id)?'done':''}" onclick="go('${s.id}')"><span class="n">${stepDone(s.id)?'✓':i+1}</span><span class="lbl">${s.label}</span></button>`).join('');
+}
+function go(id){step=id;render();window.scrollTo({top:0,behavior:'smooth'});}
+function navButtons(){
+  const i=STEPS.findIndex(s=>s.id===step);
+  return `<div class="footer-nav no-print">${i>0?`<button class="btn" onclick="go('${STEPS[i-1].id}')">← ${STEPS[i-1].label}</button>`:'<span></span>'}${i<STEPS.length-1?`<button class="btn primary" onclick="go('${STEPS[i+1].id}')">${STEPS[i+1].label} →</button>`:''}</div>`;
+}
+
+/* ---------- Input binding ---------- */
+function bind(root){
+  root.querySelectorAll('[data-path]').forEach(el=>{
+    const p=el.dataset.path;
+    if(el.type==='checkbox'){el.checked=!!getPath(inv,p);}else{el.value=getPath(inv,p)??'';}
+    el.addEventListener(el.type==='checkbox'||el.tagName==='SELECT'?'change':'input',()=>{
+      setPath(inv,p,el.type==='checkbox'?el.checked:el.value); save();
+      if(el.dataset.after) window[el.dataset.after](el);
+    });
+  });
+}
+function field(label,path,type='text',opts={}){
+  const id='f_'+path.replace(/\./g,'_');
+  let input;
+  if(type==='textarea') input=`<textarea id="${id}" data-path="${path}" rows="${opts.rows||3}" placeholder="${esc(opts.ph||'')}" ${opts.after?`data-after="${opts.after}"`:''}></textarea>`;
+  else if(type==='select') input=`<select id="${id}" data-path="${path}" ${opts.after?`data-after="${opts.after}"`:''}><option value="">Select…</option>${opts.options.map(o=>`<option>${esc(o)}</option>`).join('')}</select>`;
+  else input=`<input id="${id}" type="${type}" data-path="${path}" placeholder="${esc(opts.ph||'')}" ${opts.after?`data-after="${opts.after}"`:''}/>`;
+  return `<div class="field"><label class="f" for="${id}">${label}</label>${input}${opts.hint?`<div class="hint">${opts.hint}</div>`:''}</div>`;
+}
+
+/* ---------- Views ---------- */
+function vIncident(){
+  return `<h1>Incident details</h1>
+  <p class="lead">Record the facts before you analyse anything. Use roles, not names. The aim is to fix the system, not find someone to blame.</p>
+  <div class="panel">
+    ${field('Short title','details.title','text',{ph:'e.g. Forklift struck pallet racking, Aisle 4'})}
+    <div class="grid2">${field('Event type','details.type','select',{options:TYPES})}${field('Actual / potential severity','details.severity','select',{options:SEVERITY,hint:'Rate on the worst credible outcome, not just what happened.'})}</div>
+    <div class="grid3">${field('Date','details.date','date')}${field('Time','details.time','time')}${field('Department / area','details.dept','text',{ph:'e.g. Warehouse'})}</div>
+    ${field('Exact location','details.location','text',{ph:'e.g. Aisle 4, bay 12, ground level'})}
+    ${field('What happened','details.description','textarea',{rows:4,ph:'Sequence of events in plain language. What was the task, what went wrong, what was the outcome?'})}
+    ${field('Immediate actions taken','details.immediate','textarea',{rows:2,ph:'Area made safe, first aid given, equipment isolated, regulator notified…'})}
+    <div class="grid2">${field('Lead investigator (role)','details.investigator','text',{ph:'e.g. HSE Officer'})}${field('Investigation team (roles)','details.team','text',{ph:'e.g. Shift supervisor, maintenance lead, worker rep'})}</div>
+  </div>${navButtons()}`;
+}
+function vProblem(){
+  return `<h1>Problem statement</h1>
+  <p class="lead">One or two factual sentences: what happened, where, when, and the consequence. No causes, no blame. Everything that follows hangs off this, so make it precise.</p>
+  <div class="panel">
+    ${field('Problem statement','problem','textarea',{rows:4,ph:'e.g. On 12 Nov 2026 at 14:20, a counterbalance forklift reversing in Aisle 4 struck an upright of racking bay 12, bending it 40 mm out of plumb. No injuries; the bay was loaded with 1.2 t of stock.',after:'onProblem'})}
+    <div id="probFlags">${flagsHTML(analyzeProblem(inv.problem))}</div>
+    <div class="hint" style="margin-top:12px">Not sure how to phrase it? Try the formula: <b>On [date/time], at [location], during [task], [what happened], resulting in [actual or potential consequence].</b></div>
+  </div>${navButtons()}`;
+}
+function onProblem(){document.getElementById('probFlags').innerHTML=flagsHTML(analyzeProblem(inv.problem));}
+
+function whyCard(i){
+  const w=inv.whys[i];
+  const prev = i===0 ? (inv.problem||'the problem') : (inv.whys[i-1].answer||'(answer the previous why first)');
+  const note=aiNotes[i];
+  return `<div class="why" data-i="${i}">
+    <div class="bubble">${i+1}</div>
+    <div class="card">
+      <div class="q">Why did this happen? <b>“${esc(prev.length>220?prev.slice(0,220)+'…':prev)}”</b></div>
+      <textarea class="ans" data-path="whys.${i}.answer" data-after="onWhy" placeholder="Because… (a fact you can check, one level deeper)"></textarea>
+      <div class="grid2" style="margin-top:10px;align-items:start">
+        <div><label class="f">Evidence</label><input type="text" data-path="whys.${i}.evidence" data-after="onWhy" placeholder="Photo, record, interview (role), measurement…"/></div>
+        <div><label class="f">Status</label><div class="verify"><label class="${w.verified?'on':''}"><input type="checkbox" data-path="whys.${i}.verified" data-after="onVerify"/> Verified by evidence</label></div></div>
+      </div>
+      <div class="flagwrap">${flagsHTML(analyzeWhy(i))}</div>
+      <div class="aiwrap">${note?aiNoteHTML(i,note):''}</div>
+      <div class="row" style="margin-top:10px">
+        ${aiState.ok?`<button class="btn small ai" onclick="aiCoach(${i})" ${w.answer.trim()?'':'disabled'}>Ask AI coach</button>`:''}
+        <span class="spacer"></span>
+        ${inv.whys.length>1?`<button class="btn small ghost" onclick="removeWhy(${i})">Remove</button>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+function aiNoteHTML(i,n){
+  if(n.loading) return `<div class="ai-box"><span class="spin"></span>AI coach is reviewing why ${i+1}…</div>`;
+  if(n.error) return `<div class="ai-box">AI coach: ${esc(n.error)}</div>`;
+  const r=n.result;
+  return `<div class="ai-box"><h4>AI coach${r.root_cause_reached?' · looks like a root cause':''}</h4>
+    <div>${esc(r.assessment)}</div>
+    ${r.issues?.length?`<ul>${r.issues.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+    ${r.next_question?`<div style="margin-top:8px"><b>Next:</b> ${esc(r.next_question)}</div>`:''}
+    ${r.evidence_to_collect?.length?`<div style="margin-top:6px"><b>Evidence to collect:</b> ${r.evidence_to_collect.map(esc).join('; ')}</div>`:''}
+  </div>`;
+}
+function vWhys(){
+  const filled=inv.whys.filter(w=>w.answer.trim()).length;
+  return `<h1>Ask why</h1>
+  <p class="lead">Each answer explains the line above it. Stop when you reach something in the management system that the organisation controls and that, once fixed, would prevent this and similar events. Five is a guide: some chains need three, some need seven.</p>
+  ${!inv.problem.trim()?`<div class="panel"><div class="flag">Write the problem statement first so the first why has something to explain. <button class="btn small" style="margin-left:8px" onclick="go('problem')">Go to problem statement</button></div></div>`:''}
+  <div class="chain" id="chain">${inv.whys.map((_,i)=>whyCard(i)).join('')}</div>
+  <div class="row" style="margin:0 0 22px 46px">
+    <button class="btn" onclick="addWhy()" ${inv.whys.length>=9?'disabled':''}>+ Ask why again</button>
+    ${filled>=3?`<button class="btn primary" onclick="useLastAsRoot()">Use last answer as root cause →</button>`:''}
+  </div>
+  <div class="panel"><h3>Stuck?</h3><div class="hint" style="margin-top:0">Prompts that help: What made this the normal way of doing the job? What did people need that they didn't have? Was the risk assessed? Who decided the schedule, staffing or equipment, and on what basis? What changed recently? Has this happened before, and what was done then?</div></div>
+  ${navButtons()}`;
+}
+function onWhy(el){
+  const card=el.closest('.why'); const i=+card.dataset.i;
+  card.querySelector('.flagwrap').innerHTML=flagsHTML(analyzeWhy(i));
+  const btn=card.querySelector('.btn.ai'); if(btn) btn.disabled=!inv.whys[i].answer.trim();
+  const next=document.querySelector(`.why[data-i="${i+1}"] .q b`);
+  if(next){const a=inv.whys[i].answer||'(answer the previous why first)';next.textContent='“'+(a.length>220?a.slice(0,220)+'…':a)+'”';}
+}
+function onVerify(el){el.closest('label').classList.toggle('on',el.checked);onWhy(el);}
+function addWhy(){inv.whys.push({answer:'',evidence:'',verified:false});save();render();setTimeout(()=>{const t=document.querySelectorAll('.why textarea.ans');t[t.length-1]?.focus();},50);}
+function removeWhy(i){if(!confirm('Remove why '+(i+1)+'?'))return;inv.whys.splice(i,1);Object.keys(aiNotes).forEach(k=>delete aiNotes[k]);save();render();}
+function useLastAsRoot(){
+  const last=[...inv.whys].reverse().find(w=>w.answer.trim());
+  if(last && !inv.rootCause.statement.trim()) inv.rootCause.statement=last.answer.trim();
+  save(); go('root');
+}
+
+function vRoot(){
+  const c=inv.rootCause.checks;
+  const chk=(k,t,s)=>`<label class="check ${c[k]?'on':''}"><input type="checkbox" data-path="rootCause.checks.${k}" data-after="onCheck"/><div><b>${t}</b><small>${s}</small></div></label>`;
+  const unverified=inv.whys.filter(w=>w.answer.trim()&&!w.verified).length;
+  return `<h1>Root cause</h1>
+  <p class="lead">State the root cause as a weakness in how work is planned, resourced, controlled or supervised. Then test it. If it fails any test, go back and ask why again.</p>
+  <div class="panel">
+    ${field('Root cause statement','rootCause.statement','textarea',{rows:3,ph:'e.g. The site traffic management plan was never updated after the 2025 racking layout change, so there is no defined pedestrian/forklift separation in Aisle 4.',after:'onRoot'})}
+    <div id="rootFlags">${flagsHTML(analyzeRootText())}</div>
+    ${field('Category','rootCause.category','select',{options:CATEGORIES})}
+  </div>
+  <div class="panel"><h3>Root cause tests</h3>
+    <div class="checks">
+      ${chk('control','Within the organisation\'s control','Management can change it. Weather, luck or "the worker" are not acceptable answers.')}
+      ${chk('prevent','Fixing it prevents recurrence','Not just this event, but similar events in other areas, shifts or tasks.')}
+      ${chk('evidence','Supported by evidence','Every link in the chain can be backed by facts, not opinion.')}
+      ${chk('system','Points at a system, not a person','Replacing the individual would not have prevented it.')}
+    </div>
+    ${unverified?`<div class="flag" style="margin-top:12px">${unverified} answer${unverified>1?'s are':' is'} in the why chain not yet verified by evidence. Treat the conclusion as provisional until they are.</div>`:''}
+  </div>
+  <div class="panel">${field('Contributing factors','factors','textarea',{rows:3,ph:'Other conditions that made the event more likely or worse: lighting, shift pattern, time pressure, previous near misses…'})}</div>
+  ${navButtons()}`;
+}
+function analyzeRootText(){
+  const t=inv.rootCause.statement.trim(); const out=[]; if(!t) return out;
+  BLAME.forEach(([re,msg])=>{if(re.test(t))out.push({lvl:'warn',msg:'Not acceptable as a root cause. '+msg});});
+  if(!SYSTEM_WORDS.test(t)) out.push({lvl:'info',msg:'This doesn\'t mention a management-system element (procedure, training, supervision, maintenance, design, planning…). Check you have gone deep enough.'});
+  return out;
+}
+function onRoot(){document.getElementById('rootFlags').innerHTML=flagsHTML(analyzeRootText());}
+function onCheck(el){el.closest('.check').classList.toggle('on',el.checked);}
+
+function actionCard(i){
+  const a=inv.actions[i];
+  return `<div class="action" data-i="${i}">
+    <div class="head"><b>Action ${i+1}</b> <span class="level-tag lv-${esc(a.level||'Administrative')}" id="lvtag${i}">${esc(a.level||'Level?')}</span></div>
+    ${field('Action','actions.'+i+'.desc','textarea',{rows:2,ph:'Specific, so anyone could tell whether it was done.'})}
+    <div class="grid3">${field('Control level','actions.'+i+'.level','select',{options:LEVELS,after:'onLevel'})}${field('Type','actions.'+i+'.kind','select',{options:['Corrective','Preventive']})}${field('Status','actions.'+i+'.status','select',{options:STATUSES})}</div>
+    <div class="grid3">${field('Owner (role)','actions.'+i+'.owner','text',{ph:'e.g. Warehouse Manager'})}${field('Due date','actions.'+i+'.due','date')}${field('How effectiveness is verified','actions.'+i+'.verify','text',{ph:'e.g. Audit after 30 days'})}</div>
+    <div class="row"><span class="spacer"></span><button class="btn small ghost" onclick="removeAction(${i})">Remove</button></div>
+  </div>`;
+}
+function hocWarning(){
+  if(!inv.actions.length) return '';
+  const hi=inv.actions.some(a=>['Elimination','Substitution','Engineering'].includes(a.level));
+  return hi?'<div class="flag ok">The plan includes at least one higher-order control. Good.</div>'
+           :'<div class="flag">Every action so far is administrative or PPE. These rely on people getting it right every time. Look for an elimination, substitution or engineering control.</div>';
+}
+function vActions(){
+  return `<h1>Action plan (CAPA)</h1>
+  <p class="lead">Each action should address the root cause or a contributing factor. Corrective actions fix this situation; preventive actions stop it elsewhere. Work down the hierarchy of controls from the top.</p>
+  <div class="hoc">${LEVELS.map(l=>`<div style="background:${LEVEL_COLORS[l]}">${l}</div>`).join('')}</div>
+  <div id="hocWarn" style="margin-bottom:14px">${hocWarning()}</div>
+  ${aiState.ok?`<div class="panel"><div class="row"><div><h3 style="margin:0">AI draft</h3><div class="hint" style="margin:0">Claude reviews the whole chain, flags weak links, and proposes a root cause and actions. You decide what to keep.</div></div><span class="spacer"></span><button class="btn ai" onclick="aiSummary()" id="aiSumBtn">Draft with AI</button></div><div id="aiSum">${summaryHTML()}</div></div>`:''}
+  <div id="actionList">${inv.actions.map((_,i)=>actionCard(i)).join('')}</div>
+  <button class="btn" onclick="addAction()" style="margin-bottom:22px">+ Add action</button>
+  <div class="panel">${field('Lessons learned / to share','lessons','textarea',{rows:3,ph:'What should other sites, shifts or trainees know from this?'})}</div>
+  ${navButtons()}`;
+}
+function onLevel(el){const i=+el.closest('.action').dataset.i;const t=document.getElementById('lvtag'+i);t.className='level-tag lv-'+(el.value||'Administrative');t.textContent=el.value||'Level?';document.getElementById('hocWarn').innerHTML=hocWarning();}
+function addAction(pre){inv.actions.push(Object.assign({desc:'',level:'',kind:'Corrective',owner:'',due:'',verify:'',status:'Open'},pre||{}));save();render();}
+function removeAction(i){if(!confirm('Remove action '+(i+1)+'?'))return;inv.actions.splice(i,1);save();render();}
+
+/* ---------- Report ---------- */
+function fmtDate(d){if(!d)return '—';const x=new Date(d+'T00:00');return isNaN(x)?d:x.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function vReport(){
+  const d=inv.details; const rc=inv.rootCause;
+  const checks=[['control','Within organisational control'],['prevent','Prevents recurrence'],['evidence','Supported by evidence'],['system','Systemic, not individual']];
+  const gaps=[]; if(!stepDone('incident'))gaps.push('incident details'); if(!stepDone('problem'))gaps.push('problem statement'); if(!stepDone('whys'))gaps.push('at least three whys'); if(!stepDone('root'))gaps.push('root cause and category'); if(!stepDone('actions'))gaps.push('actions with owner and due date');
+  return `<div class="row no-print" style="margin-bottom:16px"><h1 style="margin:0">Report</h1><span class="spacer"></span><button class="btn" onclick="exportJSON()">Export .json</button><button class="btn primary" onclick="window.print()">Print / save PDF</button></div>
+  ${gaps.length?`<div class="flag no-print" style="margin-bottom:16px">Still missing: ${gaps.join(', ')}.</div>`:''}
+  <div class="report">
+    <div class="brand"><div><div class="b">SAFETY ACADEMIA</div><h1 style="margin-top:4px">${esc(d.title||'Untitled investigation')}</h1><div class="muted">5 Whys root cause investigation report</div></div><div class="muted" style="text-align:right;font-size:12px">Ref: ${esc(inv.id.toUpperCase())}<br>Updated ${fmtDate(inv.updated.slice(0,10))}</div></div>
+    <div class="meta">
+      <div><b>Event type</b>${esc(d.type||'—')}</div><div><b>Severity</b>${esc(d.severity||'—')}</div><div><b>Date / time</b>${fmtDate(d.date)} ${esc(d.time)}</div>
+      <div><b>Location</b>${esc(d.location||'—')}</div><div><b>Department</b>${esc(d.dept||'—')}</div><div><b>Lead investigator</b>${esc(d.investigator||'—')}</div>
+    </div>
+    ${d.team?`<p style="margin-top:8px;font-size:13px"><b>Team:</b> ${esc(d.team)}</p>`:''}
+    <h2>Description</h2><p>${esc(d.description||'—').replace(/\n/g,'<br>')}</p>
+    ${d.immediate?`<p style="margin-top:8px"><b>Immediate actions:</b> ${esc(d.immediate)}</p>`:''}
+    <h2>Problem statement</h2><p>${esc(inv.problem||'—')}</p>
+    <h2>Why analysis</h2>
+    <table><thead><tr><th style="width:44px">#</th><th>Why? Because…</th><th style="width:30%">Evidence</th><th style="width:80px">Status</th></tr></thead><tbody>
+      ${inv.whys.filter(w=>w.answer.trim()).map((w,i)=>`<tr><td>${i+1}</td><td>${esc(w.answer)}</td><td>${esc(w.evidence||'—')}</td><td>${w.verified?'Verified':'<span class="muted">Assumed</span>'}</td></tr>`).join('')||'<tr><td colspan="4">—</td></tr>'}
+    </tbody></table>
+    <h2>Root cause</h2>
+    <div class="rc">${esc(rc.statement||'—')}</div>
+    <p style="margin-top:8px;font-size:13px"><b>Category:</b> ${esc(rc.category||'—')} &nbsp;·&nbsp; ${checks.map(([k,t])=>(rc.checks[k]?'☑ ':'☐ ')+t).join(' &nbsp; ')}</p>
+    ${inv.factors?`<p style="margin-top:8px"><b>Contributing factors:</b> ${esc(inv.factors).replace(/\n/g,'<br>')}</p>`:''}
+    <h2>Corrective and preventive actions</h2>
+    <table><thead><tr><th>#</th><th>Action</th><th>Control</th><th>Type</th><th>Owner</th><th>Due</th><th>Verification</th><th>Status</th></tr></thead><tbody>
+      ${inv.actions.map((a,i)=>`<tr><td>${i+1}</td><td>${esc(a.desc)}</td><td>${esc(a.level)}</td><td>${esc(a.kind)}</td><td>${esc(a.owner)}</td><td>${fmtDate(a.due)}</td><td>${esc(a.verify)}</td><td>${esc(a.status)}</td></tr>`).join('')||'<tr><td colspan="8">—</td></tr>'}
+    </tbody></table>
+    ${inv.lessons?`<h2>Lessons learned</h2><p>${esc(inv.lessons).replace(/\n/g,'<br>')}</p>`:''}
+    <div class="sign"><div>Lead investigator — signature / date</div><div>Manager approval — signature / date</div></div>
+  </div>`;
+}
+
+function render(){
+  renderSteps();
+  const v=document.getElementById('view');
+  v.innerHTML={incident:vIncident,problem:vProblem,whys:vWhys,root:vRoot,actions:vActions,report:vReport}[step]();
+  bind(v);
+}
+
+/* ---------- AI ---------- */
+async function callAI(payload){
+  const r=await fetch(cfg().endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  let data={}; try{data=await r.json();}catch(e){}
+  if(!r.ok) throw new Error(data.error||('HTTP '+r.status));
+  return data;
+}
+function slim(){return {details:inv.details,problem:inv.problem,whys:inv.whys,rootCause:inv.rootCause,factors:inv.factors,actions:inv.actions};}
+async function checkAI(){
+  aiState.checked=false; updatePill();
+  try{await callAI({mode:'ping'});aiState.ok=true;}catch(e){aiState.ok=false;aiState.err=e.message;}
+  aiState.checked=true; updatePill(); render();
+}
+function updatePill(){
+  const p=document.getElementById('aiPill');
+  p.classList.toggle('on',aiState.ok);
+  document.getElementById('aiPillText').textContent=!aiState.checked?'AI coach: checking…':aiState.ok?'AI coach: on':'AI coach: off (built-in checks only)';
+}
+async function aiCoach(i){
+  aiNotes[i]={loading:true}; refreshAI(i);
+  try{const d=await callAI({mode:'coach',index:i,investigation:slim()});aiNotes[i]={result:d.result};}
+  catch(e){aiNotes[i]={error:e.message};}
+  refreshAI(i);
+}
+function refreshAI(i){const w=document.querySelector(`.why[data-i="${i}"] .aiwrap`);if(w)w.innerHTML=aiNoteHTML(i,aiNotes[i]);}
+function summaryHTML(){
+  if(!summaryAI) return '';
+  if(summaryAI.loading) return '<div class="ai-box"><span class="spin"></span>Reviewing the investigation. This takes 20–60 seconds…</div>';
+  if(summaryAI.error) return `<div class="ai-box">AI: ${esc(summaryAI.error)}</div>`;
+  const r=summaryAI.result;
+  return `<div class="ai-box">
+    <h4>Suggested root cause · ${esc(r.root_cause_category)}</h4><div>${esc(r.root_cause)}</div>
+    <div class="use"><button class="btn small" onclick="applyRoot()">Use this root cause</button></div>
+    ${r.chain_gaps?.length?`<h4 style="margin-top:12px">Gaps in the chain</h4><ul>${r.chain_gaps.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+    ${r.contributing_factors?.length?`<h4 style="margin-top:12px">Contributing factors</h4><ul>${r.contributing_factors.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+    <h4 style="margin-top:12px">Suggested actions</h4>
+    ${r.actions.map((a,k)=>`<div style="padding:8px 0;border-top:1px solid rgba(90,169,230,.2)"><span class="level-tag lv-${esc(a.level||a.control_level)}">${esc(a.control_level)}</span> <b>${esc(a.type)}</b> · ${esc(a.owner_role)} · ${esc(a.timeframe)}<div style="margin-top:4px">${esc(a.description)}</div><div class="hint">Verify: ${esc(a.verification)}</div><button class="btn small" style="margin-top:6px" onclick="applyAction(${k})">Add to plan</button></div>`).join('')}
+    ${r.lessons_learned?`<h4 style="margin-top:12px">Lessons learned</h4><div>${esc(r.lessons_learned)}</div><div class="use"><button class="btn small" onclick="applyLessons()">Use as lessons learned</button></div>`:''}
+  </div>`;
+}
+async function aiSummary(){
+  summaryAI={loading:true}; document.getElementById('aiSum').innerHTML=summaryHTML(); document.getElementById('aiSumBtn').disabled=true;
+  try{const d=await callAI({mode:'summary',investigation:slim()});summaryAI={result:d.result};}
+  catch(e){summaryAI={error:e.message};}
+  if(step==='actions'){document.getElementById('aiSum').innerHTML=summaryHTML();document.getElementById('aiSumBtn').disabled=false;}
+}
+function applyRoot(){const r=summaryAI.result;inv.rootCause.statement=r.root_cause;inv.rootCause.category=r.root_cause_category;if(!inv.factors.trim()&&r.contributing_factors?.length)inv.factors=r.contributing_factors.join('\n');save();toast('Root cause updated');}
+function applyAction(k){const a=summaryAI.result.actions[k];addAction({desc:a.description,level:a.control_level,kind:a.type,owner:a.owner_role,verify:a.verification});toast('Action added. Set a due date.');}
+function applyLessons(){inv.lessons=summaryAI.result.lessons_learned;save();render();toast('Lessons learned added');}
+
+/* ---------- Investigations list, settings, import/export ---------- */
+function openModal(html){document.getElementById('modalBody').innerHTML=html;document.getElementById('modal').classList.add('show');}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+function openList(){
+  const all=Object.values(allInv()).sort((a,b)=>b.updated.localeCompare(a.updated));
+  openModal(`<h2>My investigations</h2><p class="hint" style="margin-bottom:14px">Saved in this browser only. Export to keep a copy or share with your team.</p>
+    ${all.map(x=>`<div class="inv-item"><div class="t" onclick="openInv('${x.id}')"><b>${esc(x.details.title||'Untitled')}</b><small>${esc(x.details.type||'')} · updated ${fmtDate(x.updated.slice(0,10))}${x.id===inv.id?' · open now':''}</small></div><button class="btn small ghost" onclick="deleteInv('${x.id}')">Delete</button></div>`).join('')||'<p class="hint">Nothing saved yet.</p>'}
+    <div class="row" style="margin-top:14px"><span class="spacer"></span><button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+function openInv(id){const x=allInv()[id];if(!x)return;inv=x;Object.keys(aiNotes).forEach(k=>delete aiNotes[k]);summaryAI=null;safeSet(CUR_KEY,id);closeModal();go('incident');}
+function deleteInv(id){if(!confirm('Delete this investigation permanently?'))return;const all=allInv();delete all[id];safeSet(STORE_KEY,JSON.stringify(all));if(id===inv.id){inv=blank();step='incident';render();}openList();}
+function newInvestigation(){inv=blank();Object.keys(aiNotes).forEach(k=>delete aiNotes[k]);summaryAI=null;save();go('incident');toast('New investigation started');}
+function openSettings(){
+  const c=cfg();
+  openModal(`<h2>AI coach settings</h2>
+    <p class="hint" style="margin-bottom:14px">The AI coach runs through a small server function that keeps the Anthropic API key private. Without it, the built-in checks still flag blame language, vague answers and weak root causes.</p>
+    <label class="f">Endpoint URL</label><input type="text" id="epInput" value="${esc(c.endpoint)}"/>
+    <div class="hint">Default <code>/api/five-whys</code> works when this page is hosted on the same Vercel project. Otherwise use the full URL, e.g. <code>https://your-project.vercel.app/api/five-whys</code>.</div>
+    <p style="margin-top:12px;font-size:13px">Status: ${aiState.ok?'<span style="color:var(--green)">connected</span>':'<span style="color:var(--amber)">not connected</span>'+(aiState.err?` (${esc(aiState.err)})`:'')}</p>
+    <div class="flag info" style="margin-top:12px">Investigation text is sent to the AI service when you press an AI button. Use roles, not names, and leave out medical details.</div>
+    <div class="row" style="margin-top:16px"><span class="spacer"></span><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveSettings()">Save and test</button></div>`);
+}
+function saveSettings(){const v=document.getElementById('epInput').value.trim()||'/api/five-whys';safeSet(CFG_KEY,JSON.stringify({endpoint:v}));closeModal();checkAI().then(()=>toast(aiState.ok?'AI coach connected':'Could not reach the AI endpoint'));}
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(inv,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='5whys-'+(inv.details.title||'investigation').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,40)+'.json';
+  a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function importJSON(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.details||!Array.isArray(x.whys))throw 0;const b=blank();inv=Object.assign(b,x,{details:Object.assign(b.details,x.details),rootCause:Object.assign(b.rootCause,x.rootCause||{})});inv.id=x.id||uid();save();go('incident');toast('Imported');}catch(err){toast('That file is not a 5 Whys investigation');}};
+  r.readAsText(f);e.target.value='';
+}
+function loadExample(){
+  if(inv.details.title&&!confirm('Load the worked example as a new investigation? Your current one stays saved.'))return;
+  inv=blank();
+  Object.assign(inv.details,{title:'Forklift struck pallet racking, Aisle 4',type:'Property / equipment damage',severity:'High',date:'2026-11-12',time:'14:20',location:'Aisle 4, bay 12',dept:'Warehouse',description:'A counterbalance forklift reversing out of Aisle 4 after a pick struck the front upright of bay 12. The upright bent about 40 mm out of plumb. The bay held 1.2 t of stock. A picker was working two bays away. No one was injured.',immediate:'Bay 12 unloaded and cordoned off, forklift taken out of service for inspection, racking inspector called.',investigator:'HSE Officer',team:'Warehouse supervisor, maintenance lead, worker representative'});
+  inv.problem='On 12 Nov 2026 at 14:20, a counterbalance forklift reversing in Aisle 4 struck the front upright of racking bay 12, bending it 40 mm out of plumb while loaded with 1.2 t. A picker was working 6 m away. Potential outcome: racking collapse and serious injury.';
+  inv.whys=[
+    {answer:'The driver could not see the upright while reversing because the load on the forks blocked the rear-view mirror and there is no reversing camera.',evidence:'Reconstruction with same truck and load; photos of mirror sightline',verified:true},
+    {answer:'The aisle is 2.9 m wide, which forces a three-point turn to exit with a full pallet on this truck model.',evidence:'Aisle measured 2.9 m; manufacturer spec requires 3.6 m for right-angle stacking',verified:true},
+    {answer:'The racking was re-laid in 2025 to add two bays, narrowing Aisle 4 from 3.8 m to 2.9 m, and nobody checked it against the trucks in use.',evidence:'2025 layout drawing; purchase order for extra bays; interview with warehouse manager',verified:true},
+    {answer:'The layout change was treated as a facilities job, so it never went through the management of change procedure or a risk assessment.',evidence:'MoC register has no entry for 2025 racking change',verified:true},
+    {answer:'The management of change procedure only lists process and equipment changes, not changes to building layout or storage, so the facilities team did not know it applied.',evidence:'MoC procedure rev. 3, scope section; interview with facilities coordinator',verified:false}
+  ];
+  inv.rootCause={statement:'The management of change procedure does not cover changes to site layout and storage, so the 2025 racking change was made without a risk assessment or a check against the forklifts in use.',category:'Management of change',checks:{control:true,prevent:true,evidence:false,system:true}};
+  inv.factors='No reversing camera or proximity sensor on the truck.\nNo pedestrian exclusion zone during forklift movements in Aisle 4.\nRacking end-of-aisle protection missing on bay 12.';
+  inv.actions=[
+    {desc:'Remove the two added bays and restore Aisle 4 to at least 3.6 m.',level:'Elimination',kind:'Corrective',owner:'Warehouse Manager',due:'2026-12-15',verify:'Aisle width measured and signed off',status:'In progress'},
+    {desc:'Fit reversing cameras and rear proximity sensors to all counterbalance trucks.',level:'Engineering',kind:'Preventive',owner:'Maintenance Lead',due:'2027-01-31',verify:'Fleet check, 100% fitted',status:'Open'},
+    {desc:'Extend the MoC procedure scope to include site layout, storage and traffic route changes; brief facilities and operations managers.',level:'Administrative',kind:'Preventive',owner:'HSE Manager',due:'2026-12-31',verify:'Procedure rev. 4 issued; next 3 layout changes audited for MoC entries',status:'Open'}
+  ];
+  inv.lessons='Layout changes are changes. Any move of racking, walls or traffic routes needs a risk assessment against the vehicles and people using the space.';
+  save(); go('whys'); toast('Worked example loaded');
+}
+
+/* ---------- Init ---------- */
+(function init(){
+  const id=safeGet(CUR_KEY); const all=allInv();
+  inv=(id&&all[id])||blank();
+  render(); checkAI();
+})();
+</script>
+</body>
+</html>
