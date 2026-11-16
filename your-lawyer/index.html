@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>შენი იურისტი — Your Lawyer</title>
+<meta name="description" content="იურიდიული ოპერაციების სისტემა საგანმანათლებლო დაწესებულებებისთვის: საქმეები, ხელშეკრულებები, ვადები და ვიზირების მარშრუტები ერთ სისტემაში.">
+<meta property="og:title" content="შენი იურისტი — Your Lawyer">
+<meta property="og:description" content="არცერთი დოკუმენტი არ ტოვებს კოლეჯს შეუთანხმებლად.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#7E2434">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%237E2434'/%3E%3Ctext x='16' y='23' font-size='18' text-anchor='middle' fill='white' font-family='serif'%3Eშ%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#EFF2F1;
+    --surface:#FFFFFF;
+    --surface-2:#F6F8F7;
+    --ink:#121A1D;
+    --muted:#586A6E;
+    --line:#D3DCD9;
+    --line-strong:#B9C6C2;
+    --seal:#7E2434;
+    --seal-soft:#F3E4E6;
+    --pass:#1E5C53;
+    --pass-soft:#E2EEEB;
+    --brass:#8A6A15;
+    --shadow:0 1px 2px rgba(18,26,29,.06), 0 8px 24px -16px rgba(18,26,29,.28);
+    --maxw:1080px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --bg:#0D1214;
+      --surface:#151D1F;
+      --surface-2:#1B2426;
+      --ink:#E7EDEB;
+      --muted:#93A4A3;
+      --line:#27332F;
+      --line-strong:#384743;
+      --seal:#DB7182;
+      --seal-soft:#2A1A1E;
+      --pass:#55A798;
+      --pass-soft:#142623;
+      --brass:#C79B36;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#0D1214;
+    --surface:#151D1F;
+    --surface-2:#1B2426;
+    --ink:#E7EDEB;
+    --muted:#93A4A3;
+    --line:#27332F;
+    --line-strong:#384743;
+    --seal:#DB7182;
+    --seal-soft:#2A1A1E;
+    --pass:#55A798;
+    --pass-soft:#142623;
+    --brass:#C79B36;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.8);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans Georgian', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size:16px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding-inline:20px}
+  h1,h2,h3{font-family:'Noto Serif Georgian', Georgia, serif;text-wrap:balance;margin:0;line-height:1.24;font-weight:600}
+  h1{font-size:clamp(28px,5.2vw,50px);letter-spacing:-.01em}
+  h2{font-size:clamp(22px,3.2vw,32px)}
+  h3{font-size:18px;line-height:1.35}
+  p{margin:0}
+  a{color:inherit}
+  .eyebrow{
+    font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  /* header */
+  header.site{
+    position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .bar{display:flex;align-items:center;gap:16px;min-height:62px;flex-wrap:wrap}
+  .mark{display:flex;align-items:baseline;gap:9px;margin-inline-end:auto;text-decoration:none}
+  .mark .gl{font-family:'Noto Serif Georgian',Georgia,serif;font-weight:700;font-size:19px;letter-spacing:-.01em}
+  .mark .lat{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  nav.links{display:flex;gap:20px;font-size:14px;color:var(--muted)}
+  nav.links a{text-decoration:none}
+  nav.links a:hover{color:var(--ink)}
+  @media (max-width:760px){nav.links{display:none}}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 18px;border-radius:2px;border:1px solid transparent;
+    font-size:14.5px;font-weight:600;text-decoration:none;cursor:pointer;
+    font-family:inherit;
+  }
+  .btn-primary{background:var(--seal);color:#fff;border-color:var(--seal)}
+  :root[data-theme="dark"] .btn-primary{color:#1A0E11}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn-primary{color:#1A0E11}}
+  .btn-primary:hover{filter:brightness(1.07)}
+  .btn-ghost{border-color:var(--line-strong);color:var(--ink);background:transparent}
+  .btn-ghost:hover{background:var(--surface)}
+  .btn:focus-visible,a:focus-visible{outline:2px solid var(--pass);outline-offset:3px}
+
+  /* hero */
+  .hero{padding-block:56px 40px;border-bottom:1px solid var(--line)}
+  .hero .rule{width:52px;height:3px;background:var(--seal);margin-bottom:22px}
+  .hero h1{max-width:19ch}
+  .lede{margin-top:20px;max-width:62ch;font-size:clamp(16px,2vw,18.5px);color:var(--muted)}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+
+  .gate{
+    margin-top:38px;background:var(--surface);border:1px solid var(--line);
+    border-radius:3px;padding:18px 18px 16px;box-shadow:var(--shadow);
+    max-width:720px;
+  }
+  .gate-label{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .gate-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:2px;
+    font-size:13.5px;font-weight:600;border:1px solid var(--line-strong);
+  }
+  .chip.blocked{background:var(--seal-soft);border-color:var(--seal);color:var(--seal)}
+  .chip.open{background:var(--pass-soft);border-color:var(--pass);color:var(--pass)}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+  .arrow{color:var(--muted);font-size:15px}
+  .gate-note{margin-top:12px;font-size:13.5px;color:var(--muted)}
+
+  .facts{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);margin-top:38px;
+  }
+  .facts div{background:var(--bg);padding:16px 18px}
+  .facts b{display:block;font-family:'Noto Serif Georgian',Georgia,serif;font-size:15.5px;font-weight:600}
+  .facts span{font-size:13.5px;color:var(--muted)}
+  @media (max-width:720px){.facts{grid-template-columns:1fr}}
+
+  section{padding-block:56px;border-bottom:1px solid var(--line)}
+  .sec-head{max-width:64ch}
+  .sec-head p{color:var(--muted);margin-top:12px}
+
+  /* problem */
+  .prob{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:30px}
+  .prob li{background:var(--bg);padding:20px;list-style:none;font-size:15.5px}
+  .prob li b{display:block;font-weight:600;margin-bottom:4px}
+  .prob li span{color:var(--muted);font-size:14.5px}
+  @media (max-width:720px){.prob{grid-template-columns:1fr}}
+
+  /* modules */
+  .mods{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
+  @media (max-width:900px){.mods{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:600px){.mods{grid-template-columns:1fr}}
+  .mod{
+    background:var(--surface);border:1px solid var(--line);border-top:2px solid var(--seal);
+    padding:20px;display:flex;flex-direction:column;gap:9px;
+  }
+  .mod h3{font-family:'Noto Sans Georgian',sans-serif;font-weight:600;font-size:16.5px}
+  .mod p{font-size:14.5px;color:var(--muted)}
+
+  /* route */
+  .route{display:grid;grid-template-columns:1.25fr 1fr;gap:34px;margin-top:30px;align-items:start}
+  @media (max-width:860px){.route{grid-template-columns:1fr;gap:26px}}
+  ol.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+  ol.steps li{
+    counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:14px;
+    padding:14px 0;border-top:1px solid var(--line);
+  }
+  ol.steps li:first-child{border-top:0;padding-top:0}
+  ol.steps li::before{
+    content:counter(s,decimal-leading-zero);
+    font-family:'Noto Serif Georgian',Georgia,serif;font-size:13px;font-weight:600;
+    color:var(--seal);padding-top:3px;font-variant-numeric:tabular-nums;
+  }
+  ol.steps b{display:block;font-size:16px;font-weight:600}
+  ol.steps span{font-size:14.5px;color:var(--muted)}
+
+  .locks{background:var(--surface);border:1px solid var(--line);padding:20px;box-shadow:var(--shadow)}
+  .locks .eyebrow{display:block;margin-bottom:14px}
+  .locks ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+  .locks li{display:grid;grid-template-columns:auto 1fr;gap:10px;font-size:14.5px;align-items:start}
+  .locks .x{color:var(--seal);font-weight:700;line-height:1.5}
+  .routes-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .tag{font-size:12.5px;border:1px solid var(--line-strong);padding:5px 10px;color:var(--muted);border-radius:2px}
+
+  /* outside approval */
+  .outside{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:28px}
+  @media (max-width:720px){.outside{grid-template-columns:1fr}}
+  .outside li{
+    list-style:none;background:var(--surface-2);border-inline-start:3px solid var(--brass);
+    padding:14px 16px;font-size:15px;
+  }
+  .callout{
+    margin-top:22px;border:1px solid var(--line-strong);padding:16px 18px;
+    font-size:14.5px;color:var(--muted);background:var(--surface);
+  }
+  .callout b{color:var(--ink)}
+
+  /* status */
+  .status{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
+  @media (max-width:860px){.status{grid-template-columns:1fr}}
+  .st{background:var(--surface);border:1px solid var(--line);padding:20px}
+  .st .eyebrow{display:block;margin-bottom:12px}
+  .st.done .eyebrow{color:var(--pass)}
+  .st.soon .eyebrow{color:var(--brass)}
+  .st.no .eyebrow{color:var(--seal)}
+  .st ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px;font-size:14.5px}
+  .st li{padding-inline-start:16px;position:relative}
+  .st li::before{content:"";position:absolute;inset-inline-start:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--line-strong)}
+  .st.done li::before{background:var(--pass)}
+  .st.soon li::before{background:var(--brass)}
+  .st.no li::before{background:var(--seal)}
+
+  /* pilot + contact */
+  .pilot{display:grid;grid-template-columns:1.1fr 1fr;gap:34px;align-items:start}
+  @media (max-width:860px){.pilot{grid-template-columns:1fr;gap:26px}}
+  .pilot ul{margin:18px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;font-size:15px}
+  .pilot li{display:grid;grid-template-columns:auto 1fr;gap:10px}
+  .pilot .tick{color:var(--pass);font-weight:700}
+  .contact{background:var(--surface);border:1px solid var(--line);padding:24px;box-shadow:var(--shadow)}
+  .contact h3{font-family:'Noto Serif Georgian',Georgia,serif;font-size:19px}
+  .contact p{font-size:14.5px;color:var(--muted);margin-top:10px}
+  .field{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+  .field .k{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .field .v{font-size:16px;font-weight:600;margin-top:4px;user-select:all}
+  .field .v.todo{color:var(--brass);font-weight:500;font-size:14.5px;border:1px dashed var(--brass);padding:6px 10px;display:inline-block;user-select:none}
+
+  footer{padding-block:34px 44px;color:var(--muted);font-size:13.5px}
+  footer .disc{max-width:70ch;margin-top:12px}
+  footer .fbar{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:baseline}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+  /* standalone fixes */
+  html{scroll-padding-top:76px}
+  body{margin:0}
+  .bar{flex-wrap:nowrap}
+  @media (max-width:600px){header.site .btn{display:none}}
+  .contact .reach{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;font-size:14.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap bar">
+    <a class="mark" href="#top">
+      <span class="gl">შენი იურისტი</span>
+      <span class="lat">Your Lawyer</span>
+    </a>
+    <nav class="links" aria-label="გვერდის სექციები">
+      <a href="#module">რას აკეთებს</a>
+      <a href="#route">ვიზირება</a>
+      <a href="#status">სტატუსი</a>
+      <a href="#pilot">ადრეული წვდომა</a>
+    </nav>
+    <a class="btn btn-primary" href="#pilot">დემოს მოთხოვნა</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <div class="hero wrap">
+    <div class="rule"></div>
+    <p class="eyebrow">იურიდიული ოპერაციები საგანმანათლებლო დაწესებულებებისთვის</p>
+    <h1>არცერთი დოკუმენტი არ ტოვებს კოლეჯს შეუთანხმებლად</h1>
+    <p class="lede">
+      შენი იურისტი აერთიანებს საქმეებს, ხელშეკრულებებს, ვადებსა და ვიზირების მარშრუტებს ერთ სისტემაში —
+      და ტექნიკურად კეტავს გასვლით მოქმედებას მანამ, სანამ საჭირო ვიზა არ არის მიღებული.
+      ეს არის წესი, რომელსაც სისტემა იცავს, და არა დოკუმენტი, რომელსაც ყველა დაპირდა.
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#pilot">დემოს მოთხოვნა</a>
+      <a class="btn btn-ghost" href="#route">როგორ მუშაობს ვიზირება</a>
+    </div>
+
+    <div class="gate">
+      <span class="gate-label">გასვლითი მოქმედება — დოკუმენტი დაწესებულების სახელით</span>
+      <div class="gate-row">
+        <span class="chip blocked"><span class="dot"></span>დაბლოკილია</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span class="chip">იურისტის განხილვა</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span class="chip">ვიზა, დასაბუთებით</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span class="chip open"><span class="dot"></span>გახსნილია</span>
+      </div>
+      <p class="gate-note">
+        მდგომარეობას სისტემა ინახავს, არა ადამიანი. ყველა გადასვლა ჩაიწერება და უკან აღარ იშლება.
+      </p>
+    </div>
+
+    <div class="facts">
+      <div>
+        <b>ქართული სამართლისთვის</b>
+        <span>აგებულია ქართული კანონმდებლობისა და პროფესიული განათლების რეგულაციების ლოგიკაზე</span>
+      </div>
+      <div>
+        <b>თითოეულს — საკუთარი ბაზა</b>
+        <span>ერთი დაწესებულების მონაცემები ფიზიკურად ცალკე ბაზაშია, სხვისი ჩანაწერების გარეშე</span>
+      </div>
+      <div>
+        <b>სრული აუდიტის კვალი</b>
+        <span>ვინ, როდის, რა საფუძვლით — დამატებადი ჟურნალი, რედაქტირების გარეშე</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">ნაცნობი სურათი</p>
+      <h2>კოლეჯის იურიდიული სამუშაო იშვიათად ცხოვრობს ერთ ადგილას</h2>
+      <p>
+        ხელშეკრულებები ფოსტაშია, ვადები — ადამიანის მეხსიერებაში, პასუხისმგებლობა — ფაქტის შემდეგ.
+        ეს არ არის დისციპლინის საკითხი; უბრალოდ, სისტემა არ არსებობს.
+      </p>
+    </div>
+    <ul class="prob">
+      <li><b>ხელშეკრულება საქაღალდეშია, ვერსია — ვიღაცის ფოსტაში</b><span>ბოლო ხელმოწერილი რედაქცია იძებნება, არა იხსნება.</span></li>
+      <li><b>ვადებს იხსენებენ, არა აკონტროლებენ</b><span>შეწყვეტის ვადა, გაფრთხილების ვადა, პასუხის ვადა — კალენდარი პირად ჩანაწერშია.</span></li>
+      <li><b>დირექტორი აწერს ხელს ყველაფერს</b><span>რადგან სხვა ფილტრი არ არის — და ამიტომ ფილტრი ფაქტობრივად არ მუშაობს.</span></li>
+      <li><b>„ვინ დაუშვა ეს დოკუმენტი გარეთ?"</b><span>კითხვა ჩნდება მაშინ, როცა პასუხს უკვე აღარ აქვს მნიშვნელობა.</span></li>
+    </ul>
+  </section>
+
+  <section class="wrap" id="module">
+    <div class="sec-head">
+      <p class="eyebrow">რას აკეთებს</p>
+      <h2>ექვსი მოდული, ერთი ჩანაწერი თითო საქმეზე</h2>
+      <p>თითოეული მოდული ცალკე არ ცხოვრობს — მოთხოვნა, დოკუმენტი, ვადა და ვიზა ერთი და იმავე საქმეს ეკუთვნის.</p>
+    </div>
+    <div class="mods">
+      <article class="mod">
+        <h3>საქმეების რეესტრი</h3>
+        <p>ყველა იურიდიული საქმე — სტატუსით, პასუხისმგებელით, დოკუმენტებითა და მიმოწერის ისტორიით.</p>
+      </article>
+      <article class="mod">
+        <h3>ხელშეკრულებების სასიცოცხლო ციკლი</h3>
+        <p>რვაეტაპიანი გზა პროექტიდან შესრულებამდე, დამტკიცებული შაბლონების კატალოგით.</p>
+      </article>
+      <article class="mod">
+        <h3>ვადების კონტროლი</h3>
+        <p>შეწყვეტის, გაფრთხილებისა და პასუხის ვადები სისტემაში ცხოვრობს და თავად შეახსენებს.</p>
+      </article>
+      <article class="mod">
+        <h3>იურიდიული მოთხოვნის მიღება</h3>
+        <p>თანამშრომელი ავსებს მოთხოვნას; სისტემა ადგენს სასწრაფოობას, მონაცემთა კატეგორიასა და რისკს.</p>
+      </article>
+      <article class="mod">
+        <h3>იურისტის სამუშაო მაგიდა</h3>
+        <p>განხილვის რიგი სავალდებულო შემოწმებებით: ინტერესთა კონფლიქტი, უფლებამოსილება, კონფიდენციალურობა, პერსონალური მონაცემები.</p>
+      </article>
+      <article class="mod">
+        <h3>დოკუმენტების შენახვა</h3>
+        <p>დავის ან შემოწმების დროს მასალის დაფიქსირება და შენახვა, წვდომის ჟურნალით.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap" id="route">
+    <div class="sec-head">
+      <p class="eyebrow">ბირთვი</p>
+      <h2>ვიზირების მარშრუტი, რომელსაც გვერდს ვერ აუვლი</h2>
+      <p>
+        მოთხოვნის ტიპი განსაზღვრავს მარშრუტს, მარშრუტი — ვის ვიზა სჭირდება, და სანამ ეს ვიზა არ არის,
+        გასვლითი მოქმედება ტექნიკურად დაკეტილია.
+      </p>
+    </div>
+    <div class="route">
+      <ol class="steps">
+        <li><div><b>მოთხოვნა</b><span>თანამშრომელი ავსებს განაცხადს — რა სჭირდება, ვისთვის, როდისთვის.</span></div></li>
+        <li><div><b>კლასიფიკაცია</b><span>ტიპი, სასწრაფოობა, მონაცემთა კატეგორია; მაღალი რისკი ცალკე აღინიშნება.</span></div></li>
+        <li><div><b>მარშრუტი</b><span>სისტემა ირჩევს მარშრუტს განაცხადის ტიპის მიხედვით, არა ხელით.</span></div></li>
+        <li><div><b>განხილვა</b><span>იურისტი ვერ აგრძელებს, სანამ სავალდებულო შემოწმებები არ არის შევსებული.</span></div></li>
+        <li><div><b>ვიზა</b><span>ოთხი შესაძლო შედეგი — თითოეული სავალდებულო დასაბუთებით.</span></div></li>
+        <li><div><b>გასვლა</b><span>დოკუმენტი დაწესებულების სახელით გადის მხოლოდ ვიზის შემდეგ.</span></div></li>
+      </ol>
+      <aside class="locks">
+        <span class="eyebrow">რას კეტავს სისტემა</span>
+        <ul>
+          <li><span class="x" aria-hidden="true">✕</span><span>თვითდამტკიცება — მომთხოვნი ვერ დაამტკიცებს საკუთარ მოთხოვნას.</span></li>
+          <li><span class="x" aria-hidden="true">✕</span><span>ეტაპის გამოტოვება — მარშრუტი თანმიმდევრულია.</span></li>
+          <li><span class="x" aria-hidden="true">✕</span><span>ვიზა ძველ ვერსიაზე — თუ დოკუმენტი შეიცვალა, ვიზა ბათილდება.</span></li>
+          <li><span class="x" aria-hidden="true">✕</span><span>უფლებამოსილების გარეშე წვდომა — როლს ამოწმებს სერვერი, არა ინტერფეისი.</span></li>
+        </ul>
+        <div class="routes-tags" role="list" aria-label="მარშრუტების ტიპები">
+          <span class="tag" role="listitem">კონფიდენციალურობა / NDA</span>
+          <span class="tag" role="listitem">მომსახურება და საკონსულტაციო</span>
+          <span class="tag" role="listitem">შრომითი</span>
+          <span class="tag" role="listitem">სასწავლო და მსმენელთან</span>
+          <span class="tag" role="listitem">პერსონალური მონაცემები</span>
+          <span class="tag" role="listitem">სამართლებრივი შეტყობინება და დავა</span>
+          <span class="tag" role="listitem">მმართველობითი და მინდობილობა</span>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">საზღვარი</p>
+      <h2>რა ვერ სრულდება შიდა ხელმოწერით</h2>
+      <p>
+        ზოგი გადაწყვეტილება დაწესებულებამ თავად უნდა მიიღოს, ზოგს კი გარე, კვალიფიციური იურისტის ვიზა სჭირდება.
+        სისტემა ამ ზღვარს ინახავს წესად, და არა ჩვევად.
+      </p>
+    </div>
+    <ul class="outside">
+      <li>შრომითი ხელშეკრულების შეწყვეტა და დისციპლინური გადაწყვეტილებები</li>
+      <li>დავა, სასამართლო შეტყობინება, პრეტენზიის წერილი — ყველაფერი შეჯიბრებითი</li>
+      <li>მმართველობითი დოკუმენტები, მინდობილობა, რეესტრში ცვლილებები</li>
+      <li>განსაკუთრებული კატეგორიის მონაცემები და სამართალდარღვევასთან დაკავშირებული საქმეები</li>
+      <li>საზღვრისგარეშე ან საერთაშორისო ელემენტის მქონე ხელშეკრულება და მონაცემთა გადაცემა</li>
+      <li>დამტკიცებული შაბლონიდან გადახრა და ზღვარზე მაღალი ღირებულების ხელშეკრულება</li>
+    </ul>
+    <div class="callout">
+      <b>ზღვრები დაწესებულების გადასაწყვეტია.</b>
+      თანხობრივი ზღვარი და ის, რას ნიშნავს „სტანდარტული შაბლონი" კონკრეტულ კოლეჯში, სისტემაში მორგებადი პარამეტრია —
+      ჩვენ არ ვაწესებთ მას თქვენს ნაცვლად. შიდა ხელმოწერით დარჩენილი საქმეებიც იმავე ჟურნალში იწერება;
+      განსხვავება მხოლოდ ისაა, ვის აქვს ბოლო ხელმოწერის უფლება.
+    </div>
+  </section>
+
+  <section class="wrap" id="status">
+    <div class="sec-head">
+      <p class="eyebrow">გულწრფელად</p>
+      <h2>სად არის პროდუქტი დღეს</h2>
+      <p>
+        ეს არ არის დასრულებული კომერციული პროდუქტი და არც პრეზენტაცია. ქვემოთ ის, რაც აშენებულია და შემოწმებულია,
+        ის, რაც გზაშია, და ის, რაც ჯერ არ გვაქვს.
+      </p>
+    </div>
+    <div class="status">
+      <div class="st done">
+        <span class="eyebrow">აშენებულია და ტესტირებულია</span>
+        <ul>
+          <li>საქმეების, ხელშეკრულებების, ვადებისა და დოკუმენტების რეესტრები</li>
+          <li>მოთხოვნის მიღების დესკი და იურისტის განხილვის მაგიდა</li>
+          <li>ვიზირების მარშრუტების მანქანა შვიდი ტიპისთვის</li>
+          <li>სერვერის მხარეს შემოწმებული უფლებამოსილება — ავტომატური ტესტებით დაფარული</li>
+          <li>დამატებადი აუდიტის ჟურნალი ვერსიების კონფლიქტის კონტროლით</li>
+        </ul>
+      </div>
+      <div class="st soon">
+        <span class="eyebrow">მიმდინარეობს</span>
+        <ul>
+          <li>პილოტის მომზადება უსაფრთხოების აკადემიის პროფესიულ კოლეჯში</li>
+          <li>ცალკე დომენი და ცალკე ბაზა თითოეული დაწესებულებისთვის</li>
+          <li>აუდიტის ჟურნალის გამყალბებელგამძლე რეჟიმი</li>
+          <li>ინფორმაციული უსაფრთხოების მოწყობა ISO/IEC 27001-ის მოთხოვნების მიხედვით</li>
+        </ul>
+      </div>
+      <div class="st no">
+        <span class="eyebrow">ჯერ არ არის</span>
+        <ul>
+          <li>ხელოვნური ინტელექტის ფუნქციები — დაგეგმილია მხოლოდ არსებული ვიზირების ჭიშკრების შიგნით</li>
+          <li>მობილური აპლიკაცია</li>
+          <li>გავლილი ISO 27001 ან SOC 2 აუდიტი — სერტიფიკატს არ ვაცხადებთ, სანამ არ გვექნება</li>
+          <li>ინტეგრაცია ბუღალტრულ და HR სისტემებთან</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="pilot">
+    <div class="pilot">
+      <div>
+        <p class="eyebrow">ადრეული წვდომა</p>
+        <h2>ვეძებთ სამ დაწესებულებას, რომელსაც ეს პრობლემა ნამდვილად აქვს</h2>
+        <p style="color:var(--muted);margin-top:12px;max-width:52ch">
+          პილოტი არ ნიშნავს უფასო ტესტირებას თქვენი დროის ხარჯზე. ის ნიშნავს, რომ სისტემა თქვენს რეალურ
+          პროცესზე მოირგება, და თქვენი შენიშვნა პროდუქტში შევა.
+        </p>
+        <ul>
+          <li><span class="tick" aria-hidden="true">✓</span><span>თქვენი ვიზირების მარშრუტების მორგება — თქვენივე ბრძანებებისა და შაბლონების მიხედვით</span></li>
+          <li><span class="tick" aria-hidden="true">✓</span><span>არსებული ხელშეკრულებებისა და ვადების გადმოტანა რეესტრში</span></li>
+          <li><span class="tick" aria-hidden="true">✓</span><span>ცალკე ბაზა და ცალკე დომენი თქვენი დაწესებულებისთვის</span></li>
+          <li><span class="tick" aria-hidden="true">✓</span><span>პირდაპირი კავშირი განვითარების გუნდთან, და არა მხარდაჭერის ბილეთი</span></li>
+        </ul>
+      </div>
+      <div class="contact">
+        <h3>დემოს მოთხოვნა</h3>
+        <p>
+          მოკლე ზარი — ოცი წუთი. გაჩვენებთ სისტემას რეალურ მონაცემებზე და გეტყვით პირდაპირ,
+          გამოგადგებათ თუ არა ის დღეს.
+        </p>
+        <p class="reach">დემოს დასაგეგმად დაგვიკავშირდით უსაფრთხოების აკადემიის კოლეჯის მეშვეობით.</p>
+        <div class="field">
+          <div class="k">პირველი დაწესებულება</div>
+          <div class="v">უსაფრთხოების აკადემიის პროფესიული კოლეჯი, თბილისი</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <div class="fbar">
+    <div>
+      <span style="font-family:'Noto Serif Georgian',Georgia,serif;font-weight:700">შენი იურისტი</span>
+      <span style="letter-spacing:.16em;text-transform:uppercase;font-size:10.5px;margin-inline-start:8px">Your Lawyer</span>
+    </div>
+    <div>იურიდიული ოპერაციების სისტემა საგანმანათლებლო დაწესებულებებისთვის</div>
+  </div>
+  <p class="disc">
+    შენი იურისტი არ არის იურიდიული კონსულტაცია და არ ცვლის ლიცენზირებულ ადვოკატს. სისტემა მართავს პროცესს —
+    ინახავს საქმეს, აკონტროლებს ვადას და უზრუნველყოფს, რომ საჭირო ვიზა მიღებული იყოს მანამ, სანამ დოკუმენტი
+    დაწესებულების სახელით გავა.
+  </p>
+</footer>
+</body>
+</html>
