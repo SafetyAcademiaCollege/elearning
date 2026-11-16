@@ -1036,24 +1036,26 @@ async function saveProgress(done){
 
 function toggleAI(){document.getElementById('aiPanel').classList.toggle('open');}
 
+// The AI assistant goes through a server-side proxy (see ai-proxy/README.md) so no
+// API key ever ships in this page. Set AI_PROXY_URL after deploying the proxy.
+const AI_PROXY_URL='';
+function escHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function sendAI(){
   const inp=document.getElementById('aiIn');const msg=inp.value.trim();if(!msg)return;inp.value='';
   const msgs=document.getElementById('aiMsgs');
-  msgs.innerHTML+=`<div class="ai-msg user"><div class="ai-av">👤</div><div class="ai-bubble">${msg}</div></div>`;
-  msgs.innerHTML+=`<div class="ai-msg" id="aiLoad"><div class="ai-av">🤖</div><div class="ai-bubble" style="color:var(--muted);font-style:italic">${lang==='ka'?'ვფიქრობ...':'Thinking...'}</div></div>`;
+  msgs.insertAdjacentHTML('beforeend',`<div class="ai-msg user"><div class="ai-av">👤</div><div class="ai-bubble">${escHtml(msg)}</div></div>`);
+  msgs.insertAdjacentHTML('beforeend',`<div class="ai-msg" id="aiLoad"><div class="ai-av">🤖</div><div class="ai-bubble" style="color:var(--muted);font-style:italic">${lang==='ka'?'ვფიქრობ...':'Thinking...'}</div></div>`);
   msgs.scrollTop=msgs.scrollHeight;
   const l=COURSE_LESSONS[activeCourse.id]?.[lang]?.[activeLesson];
   try{
-    const GEMINI_KEY='AIzaSyCFbPBPmnkB2jGq2bVCm1-5KnsFYr_uf1M';
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:`You are Safety Academia's AI assistant. Current lesson: "${l?.title||'General'}". Always respond in the same language the user writes in. Be concise and practical about occupational safety.\n\nUser: ${msg}`}]}],generationConfig:{maxOutputTokens:800,temperature:0.7}})});
-    if(!r.ok){const err=await r.text();throw new Error('HTTP '+r.status+': '+err);}
-    const d=await r.json();
-    if(d.error)throw new Error(d.error.message||'Gemini error');
-    const parts=d?.candidates?.[0]?.content?.parts;
-    const reply=(parts&&parts.length>0&&parts[0].text)?parts[0].text:(lang==='ka'?'პასუხი ვერ მივიღე. სცადეთ ხელახლა.':'Could not get a response. Please try again.');
-    document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble">${reply.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;
-  }catch(e){const errMsg=lang==='ka'?'შეცდომა: '+e.message:'Error: '+e.message;document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble" style="color:#e74c3c;font-size:12px">${errMsg}</div></div>`;}
+    if(!AI_PROXY_URL)throw new Error(lang==='ka'?'AI ასისტენტი ჯერ არ არის კონფიგურირებული.':'The AI assistant is not configured yet.');
+    const r=await fetch(AI_PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({lesson:String(l?.title||'General').slice(0,200),message:msg.slice(0,2000)})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.error||('HTTP '+r.status));
+    const reply=d.reply||(lang==='ka'?'პასუხი ვერ მივიღე. სცადეთ ხელახლა.':'Could not get a response. Please try again.');
+    document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble">${escHtml(reply).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;
+  }catch(e){const errMsg=(lang==='ka'?'შეცდომა: ':'Error: ')+e.message;document.getElementById('aiLoad').outerHTML=`<div class="ai-msg"><div class="ai-av">🤖</div><div class="ai-bubble" style="color:#e74c3c;font-size:12px">${escHtml(errMsg)}</div></div>`;}
   msgs.scrollTop=msgs.scrollHeight;
 }
 

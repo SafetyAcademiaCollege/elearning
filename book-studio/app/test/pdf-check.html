@@ -1,0 +1,18 @@
+<!doctype html>
+<html><body>
+<p id="status">rendering…</p>
+<script type="module">
+  import { buildPdfDefinition } from "/src/export/pdf.ts";
+  import { renderPdf } from "/src/export/pdf-browser.ts";
+  import { sampleManuscript } from "/test/fixture.ts";
+  try {
+    const blob = await renderPdf(buildPdfDefinition(sampleManuscript()));
+    const buf = new Uint8Array(await blob.arrayBuffer());
+    let s = ""; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+    window.__pdf = btoa(s);
+    document.getElementById("status").textContent = "done " + buf.length;
+  } catch (e) {
+    document.getElementById("status").textContent = "error " + e.message;
+  }
+</script>
+</body></html>

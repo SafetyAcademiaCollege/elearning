@@ -1,0 +1,24 @@
+# Supabase CLI project config (used by `supabase link`, `db push` and `functions deploy`).
+project_id = "book-studio"
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/**"]
+# Invite-only: people join through an organisation owner's invite.
+enable_signup = false
+
+[auth.email]
+enable_signup = false
+
+[functions.ai]
+verify_jwt = true
+
+[functions.team]
+verify_jwt = true
+
+[functions.billing]
+verify_jwt = true
+
+# Stripe calls this without a Supabase JWT; the handler verifies Stripe's signature instead.
+[functions.stripe-webhook]
+verify_jwt = false
