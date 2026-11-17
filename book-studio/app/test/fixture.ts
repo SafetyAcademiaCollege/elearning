@@ -6,6 +6,7 @@ export function sampleManuscript(overrides: Partial<Manuscript> = {}): Manuscrip
     book: { id: "8a6d2f0e-1111-4222-8333-944455556666", title: "ATO Training Manual", subtitle: "PPL(A) course", documentRef: "TM-01" },
     langs: ["en", "ka"],
     generatedAt: "2026-11-16T10:00:00.000Z",
+    includeAuthorship: false,
     revisions: [
       { revision: 0, date: "2026-11-10T09:00:00.000Z", chapterNumber: 1, chapterTitle: "Part A — General", description: "Initial issue" },
     ],

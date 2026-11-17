@@ -36,6 +36,8 @@ export interface Manuscript {
   chapters: ManuscriptChapter[];
   revisions: RevisionRow[];
   generatedAt: string;
+  /** Include per-chapter authorship lines and the AI provenance appendix. Off by default. */
+  includeAuthorship: boolean;
 }
 
 export type ExportFormat = "docx" | "pdf" | "epub" | "scorm";

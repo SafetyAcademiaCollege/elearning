@@ -130,6 +130,8 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var
 .tabs button.on { color: var(--ink); border-bottom-color: var(--signal); }
 .flag { background: var(--alert-bg); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
 .flag b { color: var(--alert); }
+.suggestion { background: var(--info-bg); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+.suggestion b { color: var(--info); }
 .comment { border-left: 2px solid var(--line); padding: 2px 0 2px 10px; font-size: 13px; }
 .comment.review { border-left-color: var(--signal); }
 .comment.resolved { opacity: .55; }

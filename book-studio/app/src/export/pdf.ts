@@ -122,7 +122,7 @@ export function buildPdfDefinition(m: Manuscript): TDocumentDefinitions {
     content.push(t(`${c.number}. ${chapterTitleFor(c, lead)}`, { style: "h1", pageBreak: "before", tocItem: true, tocStyle: { fontSize: 10 } }));
     if (m.langs.length > 1 && c.title[m.langs[1]]) content.push(t(chapterTitleFor(c, m.langs[1]), { fontSize: 12, color: "#555555", margin: [0, -4, 0, 4] }));
     content.push(
-      t(`${statusLine(c)}  ·  ${m.langs.map((l) => `${l.toUpperCase()}: ${provenanceLabel(c, l)}`).join("  ·  ")}`, {
+      t(m.includeAuthorship ? `${statusLine(c)}  ·  ${m.langs.map((l) => `${l.toUpperCase()}: ${provenanceLabel(c, l)}`).join("  ·  ")}` : statusLine(c), {
         fontSize: 7.5,
         color: "#777777",
         margin: [0, 0, 0, 12],
@@ -150,17 +150,19 @@ export function buildPdfDefinition(m: Manuscript): TDocumentDefinitions {
     }
   }
 
-  // Provenance appendix
-  content.push(t("Appendix — Authorship and AI Provenance", { style: "h1", pageBreak: "before", tocItem: true, tocStyle: { fontSize: 10 } }));
-  content.push(t(DISCLOSURE_NOTE, { fontSize: 9, margin: [0, 0, 0, 10] }));
-  content.push(
-    simpleTable(
-      ["No.", "Chapter", ...m.langs.map(langHeading)],
-      m.chapters.map((c) => [String(c.number), chapterTitleFor(c, lead), ...m.langs.map((l) => provenanceLabel(c, l))]),
-      m.langs.length > 1 ? [28, "*", 110, 110] : [28, "*", 140],
-      brand,
-    ),
-  );
+  // Provenance appendix (optional)
+  if (m.includeAuthorship) {
+    content.push(t("Appendix — Authorship and AI Provenance", { style: "h1", pageBreak: "before", tocItem: true, tocStyle: { fontSize: 10 } }));
+    content.push(t(DISCLOSURE_NOTE, { fontSize: 9, margin: [0, 0, 0, 10] }));
+    content.push(
+      simpleTable(
+        ["No.", "Chapter", ...m.langs.map(langHeading)],
+        m.chapters.map((c) => [String(c.number), chapterTitleFor(c, lead), ...m.langs.map((l) => provenanceLabel(c, l))]),
+        m.langs.length > 1 ? [28, "*", 110, 110] : [28, "*", 140],
+        brand,
+      ),
+    );
+  }
 
   const headerText = [m.book.title, m.book.documentRef].filter(Boolean).join("  ·  ");
   return {

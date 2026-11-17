@@ -36,7 +36,7 @@ async function fetchLogo(path: string | null): Promise<Manuscript["org"]["logo"]
   return { bytes: new Uint8Array(await data.arrayBuffer()), mime };
 }
 
-export async function loadManuscript(bookId: string, langs: Lang[]): Promise<Manuscript> {
+export async function loadManuscript(bookId: string, langs: Lang[], includeAuthorship = false): Promise<Manuscript> {
   const book = await supabase.from("books").select("*").eq("id", bookId).single();
   if (book.error) throw book.error;
   const [org, chapters, prov, links, events] = await Promise.all([
@@ -81,5 +81,6 @@ export async function loadManuscript(bookId: string, langs: Lang[]): Promise<Man
     chapters: mChapters,
     revisions: buildRevisionRows(mChapters, (events.data ?? []) as AuditEvent[]),
     generatedAt: new Date().toISOString(),
+    includeAuthorship,
   };
 }

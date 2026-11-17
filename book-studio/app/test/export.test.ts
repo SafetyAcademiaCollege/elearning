@@ -36,8 +36,15 @@ describe("model", () => {
 });
 
 describe("DOCX", () => {
-  it("produces a Word file with both languages, lists and the provenance appendix", async () => {
+  it("is clean by default: no AI labels or provenance appendix", async () => {
     const buf = await Packer.toBuffer(await buildDocx(sampleManuscript()));
+    const xml = await (await JSZip.loadAsync(buf)).file("word/document.xml")!.async("string");
+    expect(xml).toContain("ეს სახელმძღვანელო აღწერს");
+    expect(xml).not.toMatch(/AI-generated|Provenance|Written by the author/);
+  });
+
+  it("produces a Word file with both languages, lists and, on request, the provenance appendix", async () => {
+    const buf = await Packer.toBuffer(await buildDocx(sampleManuscript({ includeAuthorship: true })));
     const zip = await JSZip.loadAsync(buf);
     const xml = await zip.file("word/document.xml")!.async("string");
     expect(xml).toContain("ATO Training Manual");
@@ -69,6 +76,9 @@ describe("PDF", () => {
     pdfmake.setFonts(fonts);
     pdfmake.setUrlAccessPolicy(() => false);
     pdfmake.setLocalAccessPolicy(() => true);
+    const clean = JSON.stringify(buildPdfDefinition(sampleManuscript()).content);
+    expect(clean).not.toMatch(/AI-generated|Provenance/);
+    expect(JSON.stringify(buildPdfDefinition(sampleManuscript({ includeAuthorship: true })).content)).toContain("AI-generated, human-reviewed");
     const buf: Buffer = await pdfmake.createPdf(buildPdfDefinition(sampleManuscript())).getBuffer();
     const head = buf.subarray(0, 5).toString("latin1");
     expect(head).toBe("%PDF-");
@@ -80,8 +90,16 @@ describe("PDF", () => {
 });
 
 describe("EPUB", () => {
+  it("leaves out the provenance page unless asked", async () => {
+    const clean = await buildEpub(sampleManuscript());
+    expect(clean.file("OEBPS/provenance.xhtml")).toBeNull();
+    expect(await clean.file("OEBPS/content.opf")!.async("string")).not.toContain("provenance");
+    const full = await buildEpub(sampleManuscript({ includeAuthorship: true }));
+    expect(full.file("OEBPS/provenance.xhtml")).toBeTruthy();
+  });
+
   it("is a valid EPUB container with well-formed XHTML", async () => {
-    const zip = await buildEpub(sampleManuscript());
+    const zip = await buildEpub(sampleManuscript({ includeAuthorship: true }));
     const bytes = await zip.generateAsync({ type: "uint8array" });
     // mimetype must be the first entry, stored uncompressed
     expect(new TextDecoder().decode(bytes.subarray(30, 38))).toBe("mimetype");

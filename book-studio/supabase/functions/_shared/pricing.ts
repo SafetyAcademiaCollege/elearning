@@ -1,14 +1,15 @@
 // AI model choice and cost accounting. Pure module: no Deno APIs, so it is
 // unit-tested from the app's test suite too.
 
-export type Op = "blueprint" | "draft" | "adapt" | "check";
+export type Op = "blueprint" | "draft" | "adapt" | "check" | "suggest";
 
-/** Default model per operation. Override with DRAFT_MODEL / ADAPT_MODEL / CHECK_MODEL / BLUEPRINT_MODEL. */
+/** Default model per operation. Override with DRAFT_MODEL / ADAPT_MODEL / CHECK_MODEL / BLUEPRINT_MODEL / SUGGEST_MODEL. */
 export const DEFAULT_MODELS: Record<Op, string> = {
   draft: "claude-opus-5-5",
   adapt: "claude-opus-5-5",
   blueprint: "claude-haiku-5-5",
   check: "claude-haiku-5-5",
+  suggest: "claude-opus-5-5",
 };
 
 // USD per million tokens [input, output]. Keep in step with Anthropic's price list.

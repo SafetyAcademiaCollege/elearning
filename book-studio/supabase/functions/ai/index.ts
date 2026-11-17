@@ -4,6 +4,7 @@
 //   { op: "draft",     chapter_id, lang }                 -> SSE stream, saves an AI version
 //   { op: "adapt",     chapter_id, from, to }             -> SSE stream, saves an AI version
 //   { op: "check",     chapter_id, lang }                 -> JSON { flags }
+//   { op: "suggest",   chapter_id, lang }                 -> JSON { suggestions } (advice only, no text written)
 //   { op: "blueprint", book_id, notes, goal_lang }        -> JSON { chapters } (inserted into the book)
 //
 // Every call: verifies the user and their role, enforces the organisation's monthly
@@ -27,6 +28,9 @@ import {
   type Lang,
   parseBlueprint,
   parseFlags,
+  parseSuggestions,
+  SUGGEST_SCHEMA,
+  suggestPrompt,
   type SourceDoc,
   systemPrompt,
 } from "../_shared/prompts.ts";
@@ -64,12 +68,13 @@ Deno.serve(async (req) => {
     const user = await requireUser(db);
     const body = await req.json().catch(() => ({}));
     const op = body.op as Op;
-    if (!["draft", "adapt", "check", "blueprint"].includes(op)) throw new HttpError(400, "Unknown operation.");
+    if (!["draft", "adapt", "check", "suggest", "blueprint"].includes(op)) throw new HttpError(400, "Unknown operation.");
 
     if (op === "blueprint") return await blueprint(db, user.id, body);
 
     const loaded = await loadChapter(db, String(body.chapter_id ?? ""));
     if (op === "check") return await check(db, user.id, loaded, body);
+    if (op === "suggest") return await suggest(db, user.id, loaded, body);
     return await streamProse(db, user.id, loaded, op, body);
   } catch (err) {
     return handleError(err);
@@ -367,14 +372,68 @@ async function check(db: SupabaseClient, userId: string, l: Loaded, body: Record
   const flags = parseFlags(textOut);
 
   const admin = adminClient();
-  await admin.from("chapter_flags").delete().eq("chapter_id", l.chapter.id).eq("lang", lang);
+  await admin.from("chapter_flags").delete().eq("chapter_id", l.chapter.id).eq("lang", lang).eq("kind", "check");
   if (flags.length) {
     const { error } = await admin.from("chapter_flags").insert(
-      flags.map((f) => ({ org_id: l.chapter.org_id, chapter_id: l.chapter.id, lang, type: f.type, note: f.note })),
+      flags.map((f) => ({ org_id: l.chapter.org_id, chapter_id: l.chapter.id, lang, type: f.type, note: f.note, kind: "check" })),
     );
     if (error) throw error;
   }
   return json({ flags });
+}
+
+// ---------------------------------------------------------------------------
+// suggest: editorial advice for an author who writes the text themselves.
+// Nothing here writes chapter text, so the chapter stays author-original.
+
+async function suggest(db: SupabaseClient, userId: string, l: Loaded, body: Record<string, unknown>) {
+  await requireRole(db, l.chapter.org_id, "author");
+  const lang = parseLang(body.lang, "chapter");
+  const prompt = suggestPrompt({
+    ctx: l.ctx,
+    lang,
+    chapterTitle: (lang === "ka" ? l.chapter.title_ka : l.chapter.title_en) || l.chapter.title_en || l.chapter.title_ka,
+    goal: l.chapter.goal,
+    text: l.texts[lang],
+    sources: l.sources,
+    glossary: l.glossary,
+  });
+  const model = modelFor("suggest");
+  const system = systemPrompt(l.ctx);
+  await assertBudget(l.chapter.org_id, "suggest", model, prompt.length + system.length);
+
+  const res = await anthropic.beta.messages.create({
+    model,
+    max_tokens: 16000,
+    system,
+    output_config: { effort: "medium", format: { type: "json_schema", schema: SUGGEST_SCHEMA as unknown as Record<string, unknown> } },
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    messages: [{ role: "user", content: prompt }],
+  });
+  await recordUsage({
+    org_id: l.chapter.org_id,
+    user_id: userId,
+    book_id: l.chapter.book_id,
+    chapter_id: l.chapter.id,
+    op: "suggest",
+    model: res.model,
+    usage: res.usage,
+  });
+  if (res.stop_reason === "refusal") throw new HttpError(422, "The AI declined to review this text.", "refusal");
+  const suggestions = parseSuggestions(
+    res.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join(""),
+  );
+
+  const admin = adminClient();
+  await admin.from("chapter_flags").delete().eq("chapter_id", l.chapter.id).eq("lang", lang).eq("kind", "suggest");
+  if (suggestions.length) {
+    const { error } = await admin.from("chapter_flags").insert(
+      suggestions.map((f) => ({ org_id: l.chapter.org_id, chapter_id: l.chapter.id, lang, type: f.type, note: f.note, kind: "suggest" })),
+    );
+    if (error) throw error;
+  }
+  return json({ suggestions });
 }
 
 // ---------------------------------------------------------------------------

@@ -60,6 +60,9 @@ function Review({ chapter, lang }: { chapter: Chapter; lang: Lang }) {
   }, [chapter.id, lang]);
   useEffect(() => { load(); }, [load, chapter.status, chapter.updated_at]);
 
+  const suggestions = flags.filter((f) => f.kind === "suggest");
+  const checks = flags.filter((f) => f.kind !== "suggest");
+
   async function add(e: FormEvent) {
     e.preventDefault();
     if (!body.trim()) return;
@@ -74,8 +77,15 @@ function Review({ chapter, lang }: { chapter: Chapter; lang: Lang }) {
 
   return (
     <div className="stack">
-      <h2>AI consistency flags · {LANG_LABEL[lang]}</h2>
-      {flags.length ? flags.map((f) => <div key={f.id} className="flag"><b>{f.type}.</b> {f.note}</div>) : <p className="small muted">Run “Check consistency” to review this text.</p>}
+      <h2>AI suggestions · {LANG_LABEL[lang]}</h2>
+      {suggestions.length ? (
+        <>
+          <p className="small muted" style={{ margin: 0 }}>Advice only. Make the changes in your own words; pasting AI wording into the chapter would make it AI-written.</p>
+          {suggestions.map((f) => <div key={f.id} className="suggestion"><b>{f.type}.</b> {f.note}</div>)}
+        </>
+      ) : <p className="small muted">Use “Suggest improvements” for editorial advice while you write.</p>}
+      <h2 style={{ marginTop: 8 }}>AI consistency flags · {LANG_LABEL[lang]}</h2>
+      {checks.length ? checks.map((f) => <div key={f.id} className="flag"><b>{f.type}.</b> {f.note}</div>) : <p className="small muted">Run “Check consistency” to review this text.</p>}
       <h2 style={{ marginTop: 8 }}>Comments</h2>
       {comments.map((c) => (
         <div key={c.id} className={`comment ${c.kind}${c.resolved ? " resolved" : ""}`}>

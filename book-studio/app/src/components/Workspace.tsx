@@ -21,7 +21,7 @@ export default function Workspace({ book, chapter, lang, prov, onChanged, onLang
   const current = prov[lang];
   const [text, setText] = useState(current?.body ?? "");
   const [save, setSave] = useState<SaveState>("idle");
-  const [busy, setBusy] = useState<null | "draft" | "adapt" | "check" | "workflow">(null);
+  const [busy, setBusy] = useState<null | "draft" | "adapt" | "check" | "suggest" | "workflow">(null);
   const [msg, setMsg] = useState<{ kind: "error" | "ok" | "info" | "warn"; text: string } | null>(null);
   const [titles, setTitles] = useState({ title_en: chapter.title_en, title_ka: chapter.title_ka, goal: chapter.goal });
   const [noteFor, setNoteFor] = useState<null | "request_changes" | "reopen">(null);
@@ -114,6 +114,27 @@ export default function Workspace({ book, chapter, lang, prov, onChanged, onLang
     }
   }
 
+  async function suggest() {
+    window.clearTimeout(timer.current);
+    if (save === "dirty") await persist(latest.current);
+    setBusy("suggest");
+    setMsg(null);
+    try {
+      const r = await callFunction<{ suggestions: unknown[] }>("ai", { op: "suggest", chapter_id: chapter.id, lang });
+      setMsg({
+        kind: "ok",
+        text: r.suggestions.length
+          ? `${r.suggestions.length} suggestion(s) under Review. Apply them in your own words and the chapter stays author-original.`
+          : "No suggestions: the AI found nothing to improve.",
+      });
+      onChanged();
+    } catch (err) {
+      setMsg({ kind: "error", text: errorMessage(err) });
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function transition(action: string, note = "") {
     window.clearTimeout(timer.current);
     if (save === "dirty") await persist(latest.current);
@@ -176,7 +197,7 @@ export default function Workspace({ book, chapter, lang, prov, onChanged, onLang
 
       {status === "ai" && (
         <p className="small muted" style={{ margin: 0 }}>
-          AI drafted or translated this language version. It stays recorded as AI-generated however much you edit it, and the exports say so.
+          AI drafted or translated this language version. Book Studio keeps it recorded as AI-generated however much you edit it. Exports show this only if you include the authorship record; answer publishers' AI questions (such as Amazon KDP's) accordingly.
         </p>
       )}
 
@@ -203,8 +224,18 @@ export default function Workspace({ book, chapter, lang, prov, onChanged, onLang
 
       <div className="row">
         {can("author") && editableStatus && (
+          <button
+            className="btn secondary"
+            disabled={!!busy}
+            title="The AI advises; you write. The chapter stays author-original."
+            onClick={suggest}
+          >
+            {busy === "suggest" ? "Thinking…" : text.trim() ? "Suggest improvements" : "Suggest what to cover"}
+          </button>
+        )}
+        {can("author") && editableStatus && (
           <>
-            <button className="btn" disabled={!!busy} onClick={() => runProse("draft")}>
+            <button className="btn" disabled={!!busy} title="The AI writes the text. This language version becomes AI-generated." onClick={() => runProse("draft")}>
               {busy === "draft" ? "Drafting…" : text.trim() ? "Expand with AI" : "Draft with AI"}
             </button>
             {hasOther && (
@@ -225,6 +256,12 @@ export default function Workspace({ book, chapter, lang, prov, onChanged, onLang
         {(busy === "draft" || busy === "adapt") && <button className="btn ghost" onClick={() => abort.current?.abort()}>Stop watching</button>}
         {hasOther && <button className="linkbtn small" onClick={() => onLang(other)}>Switch to {LANG_LABEL[other]}</button>}
       </div>
+
+      {can("author") && editableStatus && (
+        <p className="small muted" style={{ margin: 0 }}>
+          <b>Suggest</b>: the AI advises and you write, so the chapter stays author-original. <b>Draft / Adapt</b>: the AI writes, so this language version is recorded as AI-generated.
+        </p>
+      )}
 
       <div className="workflow">
         <span className="small"><b>Workflow:</b></span>

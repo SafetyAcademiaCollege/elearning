@@ -141,12 +141,10 @@ export async function buildDocx(m: Manuscript): Promise<Document> {
     if (m.langs.length > 1 && c.title[m.langs[1]]) {
       body.push(new Paragraph({ children: [new TextRun({ text: chapterTitleFor(c, m.langs[1]), color: "555555", size: 24 })] }));
     }
-    body.push(
-      new Paragraph({
-        spacing: { after: 200 },
-        children: [new TextRun({ text: `${statusLine(c)} · ${m.langs.map((l) => `${l.toUpperCase()}: ${provenanceLabel(c, l)}`).join(" · ")}`, size: 16, color: "777777" })],
-      }),
-    );
+    const meta = m.includeAuthorship
+      ? `${statusLine(c)} · ${m.langs.map((l) => `${l.toUpperCase()}: ${provenanceLabel(c, l)}`).join(" · ")}`
+      : statusLine(c);
+    body.push(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: meta, size: 16, color: "777777" })] }));
     for (const lang of m.langs) {
       if (m.langs.length > 1) {
         body.push(new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(langHeading(lang))] }));
@@ -176,18 +174,20 @@ export async function buildDocx(m: Manuscript): Promise<Document> {
     }
   });
 
-  // Provenance appendix
-  body.push(new Paragraph({ children: [new PageBreak()] }));
-  body.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("Appendix — Authorship and AI Provenance")] }));
-  body.push(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: DISCLOSURE_NOTE, size: 19 })] }));
-  body.push(
-    table(
-      ["No.", "Chapter", ...m.langs.map((l: Lang) => langHeading(l))],
-      m.chapters.map((c) => [String(c.number), chapterTitleFor(c, m.langs[0]), ...m.langs.map((l) => provenanceLabel(c, l))]),
-      brand,
-      m.langs.length > 1 ? [8, 40, 26, 26] : [8, 56, 36],
-    ),
-  );
+  // Provenance appendix (optional)
+  if (m.includeAuthorship) {
+    body.push(new Paragraph({ children: [new PageBreak()] }));
+    body.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("Appendix — Authorship and AI Provenance")] }));
+    body.push(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: DISCLOSURE_NOTE, size: 19 })] }));
+    body.push(
+      table(
+        ["No.", "Chapter", ...m.langs.map((l: Lang) => langHeading(l))],
+        m.chapters.map((c) => [String(c.number), chapterTitleFor(c, m.langs[0]), ...m.langs.map((l) => provenanceLabel(c, l))]),
+        brand,
+        m.langs.length > 1 ? [8, 40, 26, 26] : [8, 56, 36],
+      ),
+    );
+  }
 
   const headerText = [m.book.title, m.book.documentRef].filter(Boolean).join(" · ");
   return new Document({

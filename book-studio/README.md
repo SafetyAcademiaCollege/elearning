@@ -10,6 +10,9 @@ course books, with AI drafting and an audit-grade record of who wrote what.
   author, reviewer, approver.
 - **Chapters in English and Georgian**, autosaved, with full version history, compare
   and restore.
+- **Two ways to work with AI.** *Suggest* mode: the AI gives editorial advice and the
+  author writes, so the chapter stays author-original. *Draft/Adapt*: the AI writes the
+  text and that language version is recorded as AI-generated.
 - **AI drafting, EN↔KA adaptation, consistency checks and blueprinting from notes**,
   through a server-side gateway that enforces each organisation's monthly AI allowance.
 - **Provenance you can show a regulator.** AI text can only enter through the gateway,
@@ -22,8 +25,10 @@ course books, with AI drafting and an audit-grade record of who wrote what.
 - **Six templates**: ATO Training Manual, OSH Course Book, Operations Manual, SMS
   Manual, Instructor Handbook, OSH Induction Booklet.
 - **Exports**: Word (DOCX), branded PDF in a controlled-manual layout (cover, record of
-  revisions, list of effective chapters, headers and footers, provenance appendix),
-  EPUB, and SCORM 1.2 for any LMS.
+  revisions, list of effective chapters, headers and footers), EPUB, and SCORM 1.2 for
+  any LMS. Exports are clean by default; the authorship record (per-chapter author/AI
+  labels and a provenance appendix) is an export option. The full record always stays
+  inside Book Studio.
 - **Plans and billing**: Pilot, Starter, Team, Institutional, with Stripe Checkout and
   Customer Portal.
 
@@ -84,8 +89,9 @@ Before inviting the first partner: [docs/SMOKE-TEST.md](docs/SMOKE-TEST.md).
 | Operation | Default model | Why |
 |---|---|---|
 | Draft chapter, adapt EN↔KA | `claude-opus-5-5` (effort high, streaming, server-side refusal fallback) | Prose quality, Georgian register |
+| Suggest (advice only) | `claude-opus-5-5` (effort medium, structured output) | Editorial judgement |
 | Consistency check, blueprint | `claude-haiku-5-5` (structured JSON output) | Cheap, fast |
 
-Override per operation with the `DRAFT_MODEL`, `ADAPT_MODEL`, `CHECK_MODEL` and
-`BLUEPRINT_MODEL` secrets. Prices for cost metering are in
+Override per operation with the `DRAFT_MODEL`, `ADAPT_MODEL`, `CHECK_MODEL`,
+`SUGGEST_MODEL` and `BLUEPRINT_MODEL` secrets. Prices for cost metering are in
 `supabase/functions/_shared/pricing.ts`.

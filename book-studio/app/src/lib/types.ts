@@ -141,6 +141,7 @@ export interface Flag {
   lang: Lang;
   type: string;
   note: string;
+  kind: "check" | "suggest";
   created_at: string;
 }
 

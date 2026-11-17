@@ -19,6 +19,7 @@ export function ExportDialog({ book, chapters, onClose }: { book: Book; chapters
   const { plan } = useOrg();
   const [format, setFormat] = useState<ExportFormat>("pdf");
   const [langs, setLangs] = useState<Lang[]>(book.languages.length > 1 ? [book.primary_lang] : book.languages);
+  const [includeAuthorship, setIncludeAuthorship] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   const unapproved = chapters.filter((c) => c.status !== "approved").length;
@@ -33,7 +34,7 @@ export function ExportDialog({ book, chapters, onClose }: { book: Book; chapters
     setMsg(null);
     try {
       const { exportBook } = await import("../export");
-      const name = await exportBook(book.id, format, langs);
+      const name = await exportBook(book.id, format, langs, includeAuthorship);
       setMsg({ kind: "ok", text: `Downloaded ${name}.` });
     } catch (err) {
       setMsg({ kind: "error", text: errorMessage(err) });
@@ -60,6 +61,16 @@ export function ExportDialog({ book, chapters, onClose }: { book: Book; chapters
               {book.languages.map((l) => <option key={l} value={l}>{LANG_LABEL[l]} only</option>)}
               <option value="both">Both, side by side per chapter</option>
             </select>
+          </label>
+        )}
+        {format !== "scorm" && (
+          <label className="check" style={{ alignItems: "flex-start" }}>
+            <input type="checkbox" checked={includeAuthorship} onChange={(e) => setIncludeAuthorship(e.target.checked)} />
+            <span>
+              Include authorship record
+              <br />
+              <span className="small muted">Adds who wrote each chapter (author or AI) under the chapter titles and an appendix at the back. Useful for regulators or clients who ask. Your full record stays in Book Studio either way.</span>
+            </span>
           </label>
         )}
         {unapproved > 0 && (

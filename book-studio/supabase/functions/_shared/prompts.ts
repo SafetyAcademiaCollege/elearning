@@ -212,6 +212,74 @@ export function blueprintPrompt(args: { ctx: BookContext; notes: string; goalLan
   ].filter(Boolean).join("\n\n");
 }
 
+export const SUGGESTION_TYPES = [
+  "Structure",
+  "Missing topic",
+  "Accuracy",
+  "Needs citation",
+  "Clarity",
+  "Terminology",
+  "Audience",
+] as const;
+
+export const SUGGEST_SCHEMA = {
+  type: "object",
+  properties: {
+    suggestions: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          type: { type: "string", enum: [...SUGGESTION_TYPES] },
+          note: { type: "string" },
+        },
+        required: ["type", "note"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["suggestions"],
+  additionalProperties: false,
+} as const;
+
+/**
+ * Advice for an author who writes the text themselves. The reply must describe
+ * what to change, never supply wording to paste: text the AI writes would make
+ * the chapter AI-generated.
+ */
+export function suggestPrompt(args: {
+  ctx: BookContext;
+  lang: Lang;
+  chapterTitle: string;
+  goal: string;
+  text: string;
+  sources: SourceDoc[];
+  glossary: GlossaryTerm[];
+}): string {
+  const empty = !args.text.trim();
+  return [
+    `Book: ${args.ctx.bookTitle}`,
+    `Chapter: "${args.chapterTitle}" (${LANG_NAME[args.lang]}). Goal: ${args.goal || "not stated."}`,
+    `You are coaching the author, who writes every word of this chapter themselves. Act as a senior editor and subject-matter reviewer.`,
+    empty
+      ? `The chapter is not written yet. Give 6 to 10 suggestions on what it should cover and in what order, what a trainee must be able to do after reading it, and which provided sources each part should rest on.`
+      : `Review the author's draft and give up to 10 suggestions, most valuable first: gaps against the goal, structure, accuracy against the provided sources, claims that need a citation, unclear instructions, terminology, and fit for trainees.`,
+    `Strict rule: do not write replacement sentences, paragraphs, headings or example wording for the chapter. Describe what to change and why, in your own words, as advice to the author. You may quote at most a few words of the author's draft to point at a passage. Each suggestion is one to three sentences, written in ${LANG_NAME[args.lang]}.`,
+    sourcesBlock(args.sources),
+    glossaryBlock(args.glossary),
+    empty ? "" : `<author_draft lang="${args.lang}">\n${args.text}\n</author_draft>`,
+  ].filter(Boolean).join("\n\n");
+}
+
+export function parseSuggestions(text: string): Flag[] {
+  const data = parseJsonObject(text) as { suggestions?: unknown };
+  if (!Array.isArray(data?.suggestions)) return [];
+  return data.suggestions
+    .filter((f): f is Flag => !!f && typeof (f as Flag).note === "string" && (f as Flag).note.trim().length > 0)
+    .slice(0, 10)
+    .map((f) => ({ type: String(f.type || "Clarity").slice(0, 60), note: f.note.trim().slice(0, 1200) }));
+}
+
 export interface Flag {
   type: string;
   note: string;

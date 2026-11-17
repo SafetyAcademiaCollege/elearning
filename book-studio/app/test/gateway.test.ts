@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { costUsd, estimateMaxCost, priceFor } from "../../supabase/functions/_shared/pricing";
-import { adaptPrompt, draftPrompt, glossaryBlock, parseBlueprint, parseFlags, sourcesBlock } from "../../supabase/functions/_shared/prompts";
+import { adaptPrompt, draftPrompt, glossaryBlock, parseBlueprint, parseFlags, parseSuggestions, sourcesBlock, suggestPrompt } from "../../supabase/functions/_shared/prompts";
 
 const ctx = { orgName: "Caucasus Flight Academy", bookTitle: "ATO Training Manual", chapterTitles: ["Part A — General", "Part B — Flight Training"] };
 
@@ -50,5 +50,16 @@ describe("prompts", () => {
     ]);
     expect(parseFlags("not json")).toEqual([]);
     expect(parseBlueprint('Here: {"chapters":[{"title_en":"Intro","title_ka":"შესავალი","goal":"g"}]}')).toHaveLength(1);
+  });
+  it("suggest mode forbids writing replacement text and covers an empty chapter", () => {
+    const withText = suggestPrompt({ ctx, lang: "ka", chapterTitle: "A", goal: "g", text: "My draft", sources: [], glossary: [] });
+    expect(withText).toContain("do not write replacement sentences");
+    expect(withText).toContain("<author_draft");
+    const empty = suggestPrompt({ ctx, lang: "en", chapterTitle: "A", goal: "g", text: "  ", sources: [], glossary: [] });
+    expect(empty).toContain("not written yet");
+    expect(empty).not.toContain("<author_draft");
+    expect(parseSuggestions('{"suggestions":[{"type":"Structure","note":"Start with the purpose."}]}')).toEqual([
+      { type: "Structure", note: "Start with the purpose." },
+    ]);
   });
 });

@@ -15,8 +15,8 @@ export function saveBlob(blob: Blob, filename: string) {
 }
 
 /** Loads the book, renders it in the chosen format and downloads it. Heavy modules load on demand. */
-export async function exportBook(bookId: string, format: ExportFormat, langs: Lang[]): Promise<string> {
-  const m = await loadManuscript(bookId, langs);
+export async function exportBook(bookId: string, format: ExportFormat, langs: Lang[], includeAuthorship = false): Promise<string> {
+  const m = await loadManuscript(bookId, langs, includeAuthorship);
   const base = safeFilename(`${m.book.documentRef ? m.book.documentRef + " " : ""}${m.book.title} ${langs.join("-").toUpperCase()}`);
 
   if (format === "docx") {

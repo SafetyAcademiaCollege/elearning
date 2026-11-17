@@ -78,13 +78,15 @@ ${m.book.subtitle ? `<p class="sub">${escapeXml(m.book.subtitle)}</p>` : ""}
 
   m.chapters.forEach((_, i) => o.file(`chapter-${i + 1}.xhtml`, chapterHtml(m, i)));
 
-  o.file(
-    "provenance.xhtml",
-    xhtml("Authorship and AI provenance", lead, `<h1>Authorship and AI provenance</h1>
-<p>${escapeXml(DISCLOSURE_NOTE)}</p>
-<table><thead><tr><th>No.</th><th>Chapter</th>${m.langs.map((l) => `<th>${escapeXml(langHeading(l))}</th>`).join("")}</tr></thead>
-<tbody>${m.chapters.map((c) => `<tr><td>${c.number}</td><td>${escapeXml(chapterTitleFor(c, lead))}</td>${m.langs.map((l) => `<td>${escapeXml(provenanceLabel(c, l))}</td>`).join("")}</tr>`).join("")}</tbody></table>`),
-  );
+  if (m.includeAuthorship) {
+    o.file(
+      "provenance.xhtml",
+      xhtml("Authorship and AI provenance", lead, `<h1>Authorship and AI provenance</h1>
+  <p>${escapeXml(DISCLOSURE_NOTE)}</p>
+  <table><thead><tr><th>No.</th><th>Chapter</th>${m.langs.map((l) => `<th>${escapeXml(langHeading(l))}</th>`).join("")}</tr></thead>
+  <tbody>${m.chapters.map((c) => `<tr><td>${c.number}</td><td>${escapeXml(chapterTitleFor(c, lead))}</td>${m.langs.map((l) => `<td>${escapeXml(provenanceLabel(c, l))}</td>`).join("")}</tr>`).join("")}</tbody></table>`),
+    );
+  }
 
   const navItems = m.chapters
     .map((c, i) => `<li><a href="chapter-${i + 1}.xhtml">${c.number}. ${escapeXml(chapterTitleFor(c, lead))}</a></li>`)
@@ -94,11 +96,10 @@ ${m.book.subtitle ? `<p class="sub">${escapeXml(m.book.subtitle)}</p>` : ""}
     xhtml("Contents", lead, `<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>
 <li><a href="title.xhtml">${escapeXml(m.book.title)}</a></li>
 ${navItems}
-<li><a href="provenance.xhtml">Authorship and AI provenance</a></li>
-</ol></nav>`),
+${m.includeAuthorship ? `<li><a href="provenance.xhtml">Authorship and AI provenance</a></li>\n` : ""}</ol></nav>`),
   );
 
-  const spine = ["title", ...m.chapters.map((_, i) => `chapter-${i + 1}`), "provenance"];
+  const spine = ["title", ...m.chapters.map((_, i) => `chapter-${i + 1}`), ...(m.includeAuthorship ? ["provenance"] : [])];
   o.file(
     "toc.ncx",
     `<?xml version="1.0" encoding="UTF-8"?>

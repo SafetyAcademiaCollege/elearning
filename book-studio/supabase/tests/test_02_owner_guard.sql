@@ -17,3 +17,19 @@ select t.reset();
 delete from organizations where name = 'Other Org';
 do $$ begin perform t.ok((select count(*) from organizations where name = 'Other Org') = 0, 'org delete cascades past the owner guard'); end $$;
 \echo 'owner guard tests passed'
+
+-- Suggest mode: advice rows and usage are recorded, and never create a version.
+select t.act_as_service();
+insert into chapter_flags (org_id, chapter_id, lang, type, note, kind)
+select c.org_id, c.id, 'en', 'Structure', 'Open with the purpose of the manual.', 'suggest'
+from chapters c join books b on b.id = c.book_id where b.title = 'ATO Training Manual' limit 1;
+insert into ai_usage (org_id, op, model, cost_usd)
+select org_id, 'suggest', 'claude-opus-5-5', 0.02 from books where title = 'ATO Training Manual';
+select t.reset();
+do $$ begin
+  perform t.ok((select count(*) from chapter_flags where kind = 'suggest') = 1, 'suggestion stored');
+  perform t.ok((select count(*) from ai_usage where op = 'suggest') = 1, 'suggest usage metered');
+end $$;
+select t.expect_error($$insert into chapter_flags (org_id, chapter_id, lang, type, note, kind)
+  select org_id, id, 'en', 'x', 'y', 'rewrite' from chapters limit 1$$, '23514', 'unknown flag kind rejected');
+\echo 'suggest mode tests passed'
