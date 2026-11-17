@@ -1,12 +1,13 @@
-import { StrictMode } from "react";
+import { StrictMode, useEffect, useState, type FormEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useParams } from "react-router-dom";
 import "./styles.css";
 import { configured, DEMO, supabase } from "./lib/supabase";
 import { resetDemo } from "./lib/demo/store";
+import { liveCode, setLiveCode, verifyCode } from "./lib/demo/live";
 import { SessionProvider, useSession } from "./lib/session";
 import { OrgProvider, useOrg } from "./lib/org";
-import { Loading } from "./components/ui";
+import { Dialog, Loading, Notice } from "./components/ui";
 import Login from "./pages/Login";
 import Welcome from "./pages/Welcome";
 import Home from "./pages/Home";
@@ -63,11 +64,58 @@ function TopBar() {
 }
 
 function DemoBanner() {
+  const [live, setLive] = useState(() => !!liveCode());
+  const [asking, setAsking] = useState(false);
+  useEffect(() => {
+    const on = () => setLive(!!liveCode());
+    window.addEventListener("book-studio-live-ai", on);
+    return () => window.removeEventListener("book-studio-live-ai", on);
+  }, []);
   return (
     <div className="demo-banner" role="note">
-      <b>Demo</b> · sample data, pre-written AI responses, nothing is shared or sent anywhere. Your changes stay in this browser.
+      <b>Demo</b>
+      <span>Sample data stays in this browser. AI: {live ? <b>live (Claude)</b> : "pre-written samples"}.</span>
+      {live
+        ? <button className="linkbtn" onClick={() => setLiveCode(null)}>Switch to sample AI</button>
+        : <button className="linkbtn" onClick={() => setAsking(true)}>Use live AI</button>}
       <button className="linkbtn" onClick={() => { resetDemo(); window.location.href = "/"; }}>Reset demo</button>
+      {asking && <LiveCodeDialog onClose={() => setAsking(false)} />}
     </div>
+  );
+}
+
+function LiveCodeDialog({ onClose }: { onClose: () => void }) {
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    const err = await verifyCode(code.trim());
+    setBusy(false);
+    if (err) setError(err);
+    else {
+      setLiveCode(code.trim());
+      onClose();
+    }
+  }
+  return (
+    <Dialog title="Use live AI" onClose={onClose}>
+      <form className="stack" onSubmit={submit} style={{ color: "var(--ink)" }}>
+        <p className="small" style={{ margin: 0 }}>
+          Live AI sends the chapter you're working on to Claude and costs real money, so it needs the access code from Safety Academia. Your book still stays in this browser.
+        </p>
+        <label className="field">Access code
+          <input id="live-code" type="password" autoComplete="off" required value={code} onChange={(e) => setCode(e.target.value)} autoFocus />
+        </label>
+        {error && <Notice kind="error">{error}</Notice>}
+        <div className="row end">
+          <button type="button" className="btn ghost" onClick={onClose}>Cancel</button>
+          <button className="btn" disabled={busy || !code.trim()}>{busy ? "Checking…" : "Switch on"}</button>
+        </div>
+      </form>
+    </Dialog>
   );
 }
 
