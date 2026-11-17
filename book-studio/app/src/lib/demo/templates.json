@@ -1,0 +1,308 @@
+[
+ {
+  "id": "ato-training-manual",
+  "name": "ATO Training Manual",
+  "name_ka": "სასწავლო ორგანიზაციის სასწავლო სახელმძღვანელო",
+  "description": "Training manual for an approved training organisation, laid out in the common Part A–E structure (general, flight training, synthetic training, theoretical knowledge, tests and checks).",
+  "domain": "aviation",
+  "sort": 1,
+  "active": true,
+  "chapters": [
+   {
+    "title_en": "Part A — General",
+    "title_ka": "ნაწილი A — ზოგადი",
+    "goal": "Set out the manual's purpose, amendment procedure, course objectives, entry requirements and the responsibilities of training staff."
+   },
+   {
+    "title_en": "Part A — Training Programme Overview",
+    "title_ka": "ნაწილი A — სასწავლო პროგრამის მიმოხილვა",
+    "goal": "Describe the course structure, phases, sequence of instruction and the time allocated to each element."
+   },
+   {
+    "title_en": "Part A — Student Progress and Records",
+    "title_ka": "ნაწილი A — სტუდენტის პროგრესი და ჩანაწერები",
+    "goal": "Explain how progress is assessed, what records are kept, and what happens when a student does not meet the standard."
+   },
+   {
+    "title_en": "Part B — Flight Training",
+    "title_ka": "ნაწილი B — ფრენითი მომზადება",
+    "goal": "Specify each flight lesson: objectives, briefing content, exercises, completion standards and the instructor's role."
+   },
+   {
+    "title_en": "Part C — Synthetic Flight Training",
+    "title_ka": "ნაწილი C — სიმულატორული მომზადება",
+    "goal": "Specify each simulator or FSTD session, the device used, its objectives and completion standards."
+   },
+   {
+    "title_en": "Part D — Theoretical Knowledge Instruction",
+    "title_ka": "ნაწილი D — თეორიული მომზადება",
+    "goal": "Set out the theoretical syllabus by subject, the teaching methods, study material and the hours per subject."
+   },
+   {
+    "title_en": "Part E — Tests and Checks",
+    "title_ka": "ნაწილი E — ტესტები და შემოწმებები",
+    "goal": "Describe progress tests, skill tests and theoretical examinations, who conducts them and the pass criteria."
+   },
+   {
+    "title_en": "Safety and Threat & Error Management in Training",
+    "title_ka": "უსაფრთხოება და საფრთხეებისა და შეცდომების მართვა სწავლებისას",
+    "goal": "Show how the organisation integrates TEM, human factors and its safety management into day-to-day training."
+   }
+  ]
+ },
+ {
+  "id": "osh-course-book",
+  "name": "OSH Course Book",
+  "name_ka": "შრომის უსაფრთხოების სასწავლო კურსი",
+  "description": "Course book for an occupational safety and health training programme: legal framework, risk assessment, common hazards, emergency response and assessment.",
+  "domain": "osh",
+  "sort": 2,
+  "active": true,
+  "chapters": [
+   {
+    "title_en": "Introduction to Occupational Safety and Health",
+    "title_ka": "შესავალი შრომის უსაფრთხოებაში",
+    "goal": "Explain why OSH matters, the cost of workplace accidents and ill health, and how the course is organised."
+   },
+   {
+    "title_en": "Legal Framework and Duties",
+    "title_ka": "სამართლებრივი ჩარჩო და ვალდებულებები",
+    "goal": "Set out the national OSH law and related international standards, and the duties of employers, specialists and workers."
+   },
+   {
+    "title_en": "Hazard Identification and Risk Assessment",
+    "title_ka": "საფრთხეების იდენტიფიკაცია და რისკების შეფასება",
+    "goal": "Teach a practical method to identify hazards, rate risk and choose controls using the hierarchy of controls."
+   },
+   {
+    "title_en": "Personal Protective Equipment",
+    "title_ka": "ინდივიდუალური დაცვის საშუალებები",
+    "goal": "Explain when PPE is the right control, how to select, fit, maintain and inspect it, and its limits."
+   },
+   {
+    "title_en": "Work at Height",
+    "title_ka": "სიმაღლეზე მუშაობა",
+    "goal": "Cover planning, fall prevention and fall arrest, ladders and scaffolds, and rescue planning."
+   },
+   {
+    "title_en": "Electrical, Machinery and Chemical Hazards",
+    "title_ka": "ელექტრული, მექანიკური და ქიმიური საფრთხეები",
+    "goal": "Describe the main mechanisms of harm and the standard controls, including isolation and safe handling."
+   },
+   {
+    "title_en": "Fire Safety and Emergency Response",
+    "title_ka": "სახანძრო უსაფრთხოება და საგანგებო რეაგირება",
+    "goal": "Explain fire prevention, evacuation, emergency plans and drills, and the roles people take in an emergency."
+   },
+   {
+    "title_en": "First Aid Essentials",
+    "title_ka": "პირველადი დახმარების საფუძვლები",
+    "goal": "Give workers the first actions to take after an injury until trained help arrives, within the limits of their training."
+   },
+   {
+    "title_en": "Incident Reporting and Investigation",
+    "title_ka": "ინციდენტების შეტყობინება და გამოძიება",
+    "goal": "Explain what must be reported, how to investigate root causes, and how lessons are fed back into risk assessment."
+   },
+   {
+    "title_en": "Assessment and Course Review",
+    "title_ka": "შეფასება და კურსის შეჯამება",
+    "goal": "Summarise key learning points and describe how learners are assessed and certified."
+   }
+  ]
+ },
+ {
+  "id": "operations-manual",
+  "name": "Operations Manual",
+  "name_ka": "საოპერაციო სახელმძღვანელო",
+  "description": "Air operator operations manual in the common four-part layout: general, aircraft operating matters, route and aerodrome, and training.",
+  "domain": "aviation",
+  "sort": 3,
+  "active": true,
+  "chapters": [
+   {
+    "title_en": "Part A — Administration and Control of the Manual",
+    "title_ka": "ნაწილი A — სახელმძღვანელოს ადმინისტრირება და კონტროლი",
+    "goal": "Explain how the manual is issued, amended, distributed and controlled."
+   },
+   {
+    "title_en": "Part A — Organisation and Responsibilities",
+    "title_ka": "ნაწილი A — ორგანიზაცია და პასუხისმგებლობები",
+    "goal": "Describe the organisational structure, nominated persons and the duties of operations personnel."
+   },
+   {
+    "title_en": "Part A — Operational Control and Supervision",
+    "title_ka": "ნაწილი A — ოპერატიული კონტროლი და ზედამხედველობა",
+    "goal": "Explain how flights are authorised, supervised and controlled."
+   },
+   {
+    "title_en": "Part A — Flight Time and Fatigue Management",
+    "title_ka": "ნაწილი A — ფრენის დრო და დაღლილობის მართვა",
+    "goal": "Set out flight and duty time limits, rest requirements and how fatigue is managed."
+   },
+   {
+    "title_en": "Part A — Operating Procedures",
+    "title_ka": "ნაწილი A — საოპერაციო პროცედურები",
+    "goal": "Describe flight preparation, fuel policy, weather minima, and normal operating procedures."
+   },
+   {
+    "title_en": "Part B — Aircraft Operating Matters",
+    "title_ka": "ნაწილი B — საჰაერო ხომალდის საოპერაციო საკითხები",
+    "goal": "Provide type-related limitations, normal, abnormal and emergency procedures, performance and mass and balance."
+   },
+   {
+    "title_en": "Part C — Route, Role, Area and Aerodrome Instructions",
+    "title_ka": "ნაწილი C — მარშრუტის, არეალისა და აეროდრომის ინსტრუქციები",
+    "goal": "Give route and aerodrome information and minima needed to plan and conduct flights."
+   },
+   {
+    "title_en": "Part D — Training",
+    "title_ka": "ნაწილი D — მომზადება",
+    "goal": "Describe training programmes and checking for all operations personnel."
+   }
+  ]
+ },
+ {
+  "id": "sms-manual",
+  "name": "Safety Management System Manual",
+  "name_ka": "უსაფრთხოების მართვის სისტემის სახელმძღვანელო",
+  "description": "SMS manual organised around the ICAO framework of four components: safety policy and objectives, safety risk management, safety assurance and safety promotion.",
+  "domain": "aviation",
+  "sort": 4,
+  "active": true,
+  "chapters": [
+   {
+    "title_en": "Safety Policy and Management Commitment",
+    "title_ka": "უსაფრთხოების პოლიტიკა და ხელმძღვანელობის ვალდებულება",
+    "goal": "State the safety policy, objectives and the accountable manager's commitment."
+   },
+   {
+    "title_en": "Safety Accountabilities and Key Safety Personnel",
+    "title_ka": "უსაფრთხოების პასუხისმგებლობები და ძირითადი პერსონალი",
+    "goal": "Define who is accountable for safety, the safety manager role and safety committees."
+   },
+   {
+    "title_en": "Emergency Response Planning",
+    "title_ka": "საგანგებო რეაგირების დაგეგმვა",
+    "goal": "Explain how the emergency response plan is coordinated with other organisations and exercised."
+   },
+   {
+    "title_en": "SMS Documentation and Records",
+    "title_ka": "SMS დოკუმენტაცია და ჩანაწერები",
+    "goal": "Describe how SMS documents and safety records are controlled and retained."
+   },
+   {
+    "title_en": "Hazard Identification",
+    "title_ka": "საფრთხეების იდენტიფიკაცია",
+    "goal": "Describe reactive, proactive and predictive methods used to identify hazards, including the reporting system."
+   },
+   {
+    "title_en": "Safety Risk Assessment and Mitigation",
+    "title_ka": "რისკების შეფასება და შემცირება",
+    "goal": "Set out the risk matrix, tolerability criteria and how mitigations are chosen and tracked."
+   },
+   {
+    "title_en": "Safety Performance Monitoring and Measurement",
+    "title_ka": "უსაფრთხოების მაჩვენებლების მონიტორინგი",
+    "goal": "Define safety performance indicators, targets, alert levels and how they are reviewed."
+   },
+   {
+    "title_en": "Management of Change",
+    "title_ka": "ცვლილებების მართვა",
+    "goal": "Explain how changes are assessed for safety risk before they are introduced."
+   },
+   {
+    "title_en": "Continuous Improvement of the SMS",
+    "title_ka": "SMS-ის უწყვეტი გაუმჯობესება",
+    "goal": "Describe audits, reviews and how findings improve the system."
+   },
+   {
+    "title_en": "Safety Training and Communication",
+    "title_ka": "უსაფრთხოების სწავლება და კომუნიკაცია",
+    "goal": "Set out SMS training for all staff and how safety information is communicated."
+   }
+  ]
+ },
+ {
+  "id": "instructor-handbook",
+  "name": "Instructor Handbook",
+  "name_ka": "ინსტრუქტორის სახელმძღვანელო",
+  "description": "Handbook for flight or OSH instructors: standardisation, lesson planning, briefing and debriefing, assessment and instructor conduct.",
+  "domain": "general",
+  "sort": 5,
+  "active": true,
+  "chapters": [
+   {
+    "title_en": "Role and Standards of the Instructor",
+    "title_ka": "ინსტრუქტორის როლი და სტანდარტები",
+    "goal": "Define what the organisation expects of its instructors and how standardisation is maintained."
+   },
+   {
+    "title_en": "How Adults Learn",
+    "title_ka": "როგორ სწავლობენ ზრდასრულები",
+    "goal": "Give instructors practical principles of adult learning, motivation and skill acquisition."
+   },
+   {
+    "title_en": "Lesson Planning",
+    "title_ka": "გაკვეთილის დაგეგმვა",
+    "goal": "Show how to plan a lesson with clear objectives, structure, timing and completion standards."
+   },
+   {
+    "title_en": "Briefing and Debriefing",
+    "title_ka": "ბრიფინგი და დებრიფინგი",
+    "goal": "Teach effective pre-lesson briefings and facilitative debriefings."
+   },
+   {
+    "title_en": "Human Factors and Threat & Error Management",
+    "title_ka": "ადამიანური ფაქტორები და საფრთხეებისა და შეცდომების მართვა",
+    "goal": "Show how to teach and assess non-technical skills alongside technical ones."
+   },
+   {
+    "title_en": "Assessment and Feedback",
+    "title_ka": "შეფასება და უკუკავშირი",
+    "goal": "Explain grading criteria, fair assessment and feedback that improves performance."
+   },
+   {
+    "title_en": "Instructor Safety Responsibilities",
+    "title_ka": "ინსტრუქტორის პასუხისმგებლობა უსაფრთხოებაზე",
+    "goal": "Set out the instructor's duties for safety during training and how to report hazards and occurrences."
+   }
+  ]
+ },
+ {
+  "id": "osh-induction",
+  "name": "OSH Induction Booklet",
+  "name_ka": "შრომის უსაფრთხოების საწყისი ინსტრუქტაჟი",
+  "description": "Short induction booklet for new workers: site rules, key hazards, emergency procedures and how to raise concerns.",
+  "domain": "osh",
+  "sort": 6,
+  "active": true,
+  "chapters": [
+   {
+    "title_en": "Welcome and Your Safety Rights",
+    "title_ka": "მოგესალმებით — თქვენი უფლებები უსაფრთხოებაზე",
+    "goal": "Tell new workers what they can expect from the employer and their right to raise concerns and stop unsafe work."
+   },
+   {
+    "title_en": "Site Rules",
+    "title_ka": "ობიექტის წესები",
+    "goal": "List the rules every worker must follow on this site and why."
+   },
+   {
+    "title_en": "Main Hazards on This Site",
+    "title_ka": "ძირითადი საფრთხეები ობიექტზე",
+    "goal": "Describe the main hazards workers will meet and the controls in place."
+   },
+   {
+    "title_en": "Emergency Procedures",
+    "title_ka": "საგანგებო პროცედურები",
+    "goal": "Explain alarms, evacuation routes, assembly points and first aid arrangements."
+   },
+   {
+    "title_en": "Reporting Incidents and Concerns",
+    "title_ka": "ინციდენტებისა და შეშფოთების შეტყობინება",
+    "goal": "Explain how and to whom to report incidents, near misses and concerns."
+   }
+  ]
+ }
+]

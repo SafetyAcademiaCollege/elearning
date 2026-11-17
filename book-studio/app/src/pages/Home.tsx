@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
+import { DEMO, supabase } from "../lib/supabase";
 import { useSession } from "../lib/session";
 import { Loading } from "../components/ui";
 
@@ -20,7 +20,7 @@ export default function Home() {
   }, [session]);
 
   if (!rows) return <Loading />;
-  if (rows.length === 1 && !isPlatformAdmin) return <Navigate to={`/o/${rows[0].org_id}`} replace />;
+  if (rows.length === 1 && (!isPlatformAdmin || DEMO)) return <Navigate to={`/o/${rows[0].org_id}`} replace />;
 
   return (
     <div className="page" style={{ maxWidth: 720 }}>

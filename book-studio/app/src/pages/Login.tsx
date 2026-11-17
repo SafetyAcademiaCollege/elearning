@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
+import { DEMO, supabase } from "../lib/supabase";
 import { useSession } from "../lib/session";
 import { Notice } from "../components/ui";
 
@@ -48,12 +48,13 @@ export default function Login() {
           <h1>Book Studio</h1>
           <p className="muted small">Write, review and approve training manuals with a full record of who wrote what.</p>
         </div>
+        {DEMO && <Notice kind="info">Demo: type any email and password, or just press Sign in.</Notice>}
         <label className="field">Email
-          <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input id="email" type="email" autoComplete="email" required={!DEMO} value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
         {mode === "password" && (
           <label className="field">Password
-            <input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+            <input id="password" type="password" autoComplete="current-password" required={!DEMO} value={password} onChange={(e) => setPassword(e.target.value)} />
           </label>
         )}
         {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}

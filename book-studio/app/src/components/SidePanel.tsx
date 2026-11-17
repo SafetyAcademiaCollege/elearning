@@ -10,7 +10,7 @@ import { LANG_LABEL } from "../lib/types";
 
 type Tab = "review" | "sources" | "history" | "activity";
 
-export default function SidePanel({ chapter, lang, onChanged }: { chapter: Chapter; lang: Lang; onChanged: () => void }) {
+export default function SidePanel({ chapter, lang, refresh, onChanged }: { chapter: Chapter; lang: Lang; refresh: number; onChanged: () => void }) {
   const [tab, setTab] = useState<Tab>("review");
   return (
     <aside className="panel side">
@@ -21,9 +21,9 @@ export default function SidePanel({ chapter, lang, onChanged }: { chapter: Chapt
           </button>
         ))}
       </div>
-      {tab === "review" && <Review chapter={chapter} lang={lang} />}
+      {tab === "review" && <Review chapter={chapter} lang={lang} refresh={refresh} />}
       {tab === "sources" && <ChapterSources chapter={chapter} />}
-      {tab === "history" && <History chapter={chapter} lang={lang} onChanged={onChanged} />}
+      {tab === "history" && <History chapter={chapter} lang={lang} refresh={refresh} onChanged={onChanged} />}
       {tab === "activity" && <Activity chapter={chapter} />}
     </aside>
   );
@@ -43,7 +43,7 @@ function useNames(orgId: string) {
   return names;
 }
 
-function Review({ chapter, lang }: { chapter: Chapter; lang: Lang }) {
+function Review({ chapter, lang, refresh }: { chapter: Chapter; lang: Lang; refresh: number }) {
   const { org } = useOrg();
   const names = useNames(org.id);
   const [flags, setFlags] = useState<Flag[]>([]);
@@ -58,7 +58,7 @@ function Review({ chapter, lang }: { chapter: Chapter; lang: Lang }) {
     setFlags((f.data ?? []) as Flag[]);
     setComments((c.data ?? []) as Comment[]);
   }, [chapter.id, lang]);
-  useEffect(() => { load(); }, [load, chapter.status, chapter.updated_at]);
+  useEffect(() => { load(); }, [load, refresh]);
 
   const suggestions = flags.filter((f) => f.kind === "suggest");
   const checks = flags.filter((f) => f.kind !== "suggest");
@@ -149,7 +149,7 @@ function ChapterSources({ chapter }: { chapter: Chapter }) {
   );
 }
 
-function History({ chapter, lang, onChanged }: { chapter: Chapter; lang: Lang; onChanged: () => void }) {
+function History({ chapter, lang, refresh, onChanged }: { chapter: Chapter; lang: Lang; refresh: number; onChanged: () => void }) {
   const { org, can } = useOrg();
   const names = useNames(org.id);
   const [versions, setVersions] = useState<Version[]>([]);
@@ -160,7 +160,7 @@ function History({ chapter, lang, onChanged }: { chapter: Chapter; lang: Lang; o
     const { data } = await supabase.from("chapter_versions").select("*").eq("chapter_id", chapter.id).eq("lang", lang).order("id", { ascending: false }).limit(100);
     setVersions((data ?? []) as Version[]);
   }, [chapter.id, lang]);
-  useEffect(() => { load(); }, [load, chapter.updated_at]);
+  useEffect(() => { load(); }, [load, refresh]);
 
   const latest = versions[0];
 

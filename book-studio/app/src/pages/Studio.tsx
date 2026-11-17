@@ -21,6 +21,7 @@ export default function Studio() {
   const [lang, setLang] = useState<Lang>("en");
   const [error, setError] = useState<string | null>(null);
   const [dialog, setDialog] = useState<"export" | "blueprint" | "book" | null>(null);
+  const [refresh, setRefresh] = useState(0);
 
   const load = useCallback(async () => {
     const [b, c, p] = await Promise.all([
@@ -38,6 +39,7 @@ export default function Studio() {
     for (const row of (p.data ?? []) as Provenance[]) (map[row.chapter_id] ??= {})[row.lang] = row;
     setProv(map);
     setActiveId((cur) => cur ?? (c.data?.[0]?.id ?? null));
+    setRefresh((n) => n + 1);
   }, [bookId]);
 
   useEffect(() => { load(); }, [load]);
@@ -134,7 +136,7 @@ export default function Studio() {
           <section className="panel page-msg">Select or add a chapter to start writing.</section>
         )}
 
-        {active && <SidePanel key={active.id} chapter={active} lang={lang} onChanged={load} />}
+        {active && <SidePanel key={active.id} chapter={active} lang={lang} refresh={refresh} onChanged={load} />}
       </div>
 
       {dialog === "export" && <ExportDialog book={book} chapters={chapters} onClose={() => setDialog(null)} />}

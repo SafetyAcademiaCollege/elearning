@@ -1,4 +1,5 @@
-import { functionsUrl, supabase } from "./supabase";
+import { DEMO, functionsUrl, supabase } from "./supabase";
+import { demoFunction, DemoError, demoStream } from "./demo/functions";
 import type { Lang } from "./types";
 
 export class ApiError extends Error {
@@ -19,6 +20,13 @@ async function authHeaders(): Promise<Record<string, string>> {
 }
 
 export async function callFunction<T>(name: string, body: unknown): Promise<T> {
+  if (DEMO) {
+    try {
+      return (await demoFunction(name, body)) as T;
+    } catch (err) {
+      throw new ApiError(err instanceof DemoError ? err.message : "Something went wrong in the demo.", "demo");
+    }
+  }
   const res = await fetch(`${functionsUrl}/${name}`, {
     method: "POST",
     headers: await authHeaders(),
@@ -41,6 +49,13 @@ export async function streamProse(
   onText: (fullText: string) => void,
   signal?: AbortSignal,
 ): Promise<StreamDone> {
+  if (DEMO) {
+    try {
+      return await demoStream(body, onText, signal);
+    } catch (err) {
+      throw new ApiError(err instanceof DemoError ? err.message : "Something went wrong in the demo.", "demo");
+    }
+  }
   const res = await fetch(`${functionsUrl}/ai`, {
     method: "POST",
     headers: await authHeaders(),

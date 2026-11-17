@@ -2,7 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useParams } from "react-router-dom";
 import "./styles.css";
-import { configured, supabase } from "./lib/supabase";
+import { configured, DEMO, supabase } from "./lib/supabase";
+import { resetDemo } from "./lib/demo/store";
 import { SessionProvider, useSession } from "./lib/session";
 import { OrgProvider, useOrg } from "./lib/org";
 import { Loading } from "./components/ui";
@@ -61,6 +62,15 @@ function TopBar() {
   );
 }
 
+function DemoBanner() {
+  return (
+    <div className="demo-banner" role="note">
+      <b>Demo</b> · sample data, pre-written AI responses, nothing is shared or sent anywhere. Your changes stay in this browser.
+      <button className="linkbtn" onClick={() => { resetDemo(); window.location.href = "/"; }}>Reset demo</button>
+    </div>
+  );
+}
+
 function NotConfigured() {
   return (
     <div className="auth">
@@ -76,6 +86,7 @@ function App() {
   if (!configured) return <NotConfigured />;
   return (
     <SessionProvider>
+      {DEMO && <DemoBanner />}
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />

@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "build:demo": "VITE_DEMO=true tsc -p tsconfig.json && VITE_DEMO=true vite build"
   },
   "dependencies": {
     "@expo-google-fonts/noto-sans": "^0.4.2",
